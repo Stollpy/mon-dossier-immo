@@ -2,15 +2,26 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(fields={"email"}, message="Email existant")
  */
 class User implements UserInterface
 {
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTime('now', new \DateTimeZone('Europe/Paris'));
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -20,6 +31,8 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=180, unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Email()
      */
     private $email;
 
@@ -36,13 +49,30 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $lastname;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $firstname;
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $token_account;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $account_confirmation;
 
     public function getId(): ?int
     {
@@ -145,6 +175,42 @@ class User implements UserInterface
     public function setFirstname(string $firstname): self
     {
         $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(?\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getTokenAccount(): ?string
+    {
+        return $this->token_account;
+    }
+
+    public function setTokenAccount(?string $token_account): self
+    {
+        $this->token_account = $token_account;
+
+        return $this;
+    }
+
+    public function getAccountConfirmation(): ?bool
+    {
+        return $this->account_confirmation;
+    }
+
+    public function setAccountConfirmation(bool $account_confirmation): self
+    {
+        $this->account_confirmation = $account_confirmation;
 
         return $this;
     }
