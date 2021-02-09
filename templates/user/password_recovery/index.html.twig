@@ -1,0 +1,18 @@
+{% extends "base.html.twig" %}
+
+{% block title %} Mot de passe oublié {% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <button type="sumbit" class="btn btn-outline-primary mt-3">Envoyer</button>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

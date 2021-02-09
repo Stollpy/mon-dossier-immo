@@ -74,6 +74,16 @@ class User implements UserInterface
      */
     private $account_confirmation;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $password_token;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $password_requestedAt;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -211,6 +221,30 @@ class User implements UserInterface
     public function setAccountConfirmation(bool $account_confirmation): self
     {
         $this->account_confirmation = $account_confirmation;
+
+        return $this;
+    }
+
+    public function getPasswordToken(): ?string
+    {
+        return $this->password_token;
+    }
+
+    public function setPasswordToken(?string $password_token): self
+    {
+        $this->password_token = $password_token;
+
+        return $this;
+    }
+
+    public function getPasswordRequestedAt(): ?\DateTimeInterface
+    {
+        return $this->password_requestedAt;
+    }
+
+    public function setPasswordRequestedAt(?\DateTimeInterface $password_requestedAt): self
+    {
+        $this->password_requestedAt = $password_requestedAt;
 
         return $this;
     }
