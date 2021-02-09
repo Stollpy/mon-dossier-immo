@@ -3,10 +3,10 @@
 namespace App\Controller;
 
 
-
-
 use App\Entity\User;
 use App\Form\UserType;
+use App\Form\EditUserType;
+use App\Form\EditUserPasswordType;
 use App\Form\PasswordRecoveryType;
 use App\Repository\UserRepository;
 use App\Form\PasswordResettingType;
@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -201,4 +202,81 @@ class UserController extends AbstractController
             'form' => $form->createView()
         ]);
     }
+  
+    /**
+     * @Route("/user/edit/{id<\d+>}", name="user.edit")
+     */
+
+    public function edit(User $user, Request $request)
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $form = $this->createForm(EditUserType::class, $user);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+            $data = $form->getData();
+
+            $this->manager->persist($data);
+            $this->manager->flush();
+
+            $id = $data->getId();
+            $this->addFlash('success', 'Vos information on bien été modifier !');
+            return $this->redirectToRoute('user.edit', ['id' => $id]);
+        }
+        
+        return $this->render('user/Dashboard/index.html.twig', [
+            'form' => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("user/dashboard/edit-password/{id<\d+>}", name="user.edit-password")
+     */
+    
+     public function editPassword(User $user, Request $request, UserPasswordEncoderInterface $encoder)
+     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $form =  $this->createForm(EditUserPasswordType::class);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+               
+            $password = $encoder->encodePassword($user, $form->get('plainPassword')->getData());
+            $user->setPassword($password);
+
+            $this->manager->persist($user);
+            $this->manager->flush();
+
+            $session = new Session();
+            $session->invalidate();
+            
+            $this->addFlash('success', 'Votre mot de passe à bien été modifier !');
+            return $this->redirectToRoute('security.login');
+            
+        }
+
+        return $this->render('user/Dashboard/edit-password.html.twig', [
+                'form' => $form->createView()
+        ]);
+     }
+
+     /**
+     * @Route("user/dashboard/remove/{id<\d+>}", name="user.remove")
+     */
+
+     public function remove(User $user)
+     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $this->manager->remove($user);
+        $this->manager->flush();
+
+        $session = new Session();
+        $session->invalidate();
+        
+        return $this->redirectToRoute('security.logout');
+
+     }
 }

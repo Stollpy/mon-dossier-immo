@@ -15,9 +15,9 @@
               <i class="fas fa-user"></i> {{ app.user.firstname }} {{ app.user.lastname }} 
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="#">Information personelles</a></li>
+              <li><a class="dropdown-item" href="{{ path('user.edit', {'id' : app.user.id}) }}">Information personelles</a></li>
               <li><a class="dropdown-item" href="#">Mes documents personelles</a></li>
-              <li><a class="dropdown-item" href="#">Changer mon mot de passe</a></li>
+              <li><a class="dropdown-item" href="{{ path('user.edit-password', {'id' : app.user.id}) }}">Changer mon mot de passe</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{{ path("security.logout") }}">Déconnexion</a></li>
             </ul>
