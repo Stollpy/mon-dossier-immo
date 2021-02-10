@@ -1,0 +1,8 @@
+knpu_oauth2_client:
+    clients:
+        google:
+            type: google
+            client_id: '%env(resolve:GOOGLE_ID_CLIENT)%'
+            client_secret: '%env(resolve:GOOGLE_SECRET_KEY)%'
+            redirect_route: user.connect_google_check
+            redirect_params: {}

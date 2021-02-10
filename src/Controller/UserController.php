@@ -17,11 +17,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
+
 
 class UserController extends AbstractController
 {
@@ -37,6 +41,10 @@ class UserController extends AbstractController
 
     /**
      * @Route("/signup", name="user.signup")
+     * @param Request $request
+     * @param UserPasswordEncoderInterface $encoder
+     * @param GuardAuthenticator $authentificatorHandler
+     * @param LoginFormAuthentificator $authentificator
      */
     public function signup(Request $request, UserPasswordEncoderInterface $encoder, 
                 GuardAuthenticatorHandler $authentificatorHandler, LoginFormAuthenficator $authenticator): Response
@@ -84,6 +92,7 @@ class UserController extends AbstractController
 
     /**
      * @Route("/account-confirmation/{id}/{token}", name="user.account_confirmation")
+     * @param User $user
      */
 
     public function accountConfirmation($token, User $user)
@@ -106,6 +115,7 @@ class UserController extends AbstractController
 
     /**
      * @Route("/password-recovery", name="user.password-recovery")
+     * @param Request $request
      */
     public function PasswordRecovery(Request $request)
     {
@@ -127,10 +137,6 @@ class UserController extends AbstractController
             $user->setPasswordRequestedAt(new \DateTime());
             $this->manager->persist($user);
             $this->manager->flush();
-
-            //$password = random_bytes( 10 );
-           // $plainPassword = bin2hex($password);
-            //$hashedPassword = $encoder->encodePassword($data, $plainPassword);
 
 
             $email = (new TemplatedEmail())
@@ -171,6 +177,9 @@ class UserController extends AbstractController
 
     /**
      * @Route("/resetting/{id}/{token}", name="user.resetting")
+     * @param User $user
+     * @param Request $request
+     * @param UserPasswordEncoderInterface $encoder
      */
 
     public function resetting($token, User $user, Request $request, UserPasswordEncoderInterface $encoder)
@@ -205,6 +214,8 @@ class UserController extends AbstractController
   
     /**
      * @Route("/user/edit/{id<\d+>}", name="user.edit")
+     * @param User $user
+     * @param Request $request
      */
 
     public function edit(User $user, Request $request)
@@ -232,6 +243,9 @@ class UserController extends AbstractController
 
     /**
      * @Route("user/dashboard/edit-password/{id<\d+>}", name="user.edit-password")
+     * @param User $user
+     * @param Request $request
+     * @param UserEncoderInterface $encoder
      */
     
      public function editPassword(User $user, Request $request, UserPasswordEncoderInterface $encoder)
@@ -264,6 +278,7 @@ class UserController extends AbstractController
 
      /**
      * @Route("user/dashboard/remove/{id<\d+>}", name="user.remove")
+     * @param User $user
      */
 
      public function remove(User $user)
@@ -279,4 +294,38 @@ class UserController extends AbstractController
         return $this->redirectToRoute('security.logout');
 
      }
+
+    /**
+     * @Route("/connect/google", name="user.connect_google")
+     * @param ClientRegistry $clientRegistry
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function ConnectGoogle(ClientRegistry $clientRegistry)
+    {
+        return $clientRegistry
+            ->getClient('google')
+            ->redirect([
+                'profile', 'email'
+            ], [])
+        ;
+    }
+
+
+     /**
+     * @param Request $request
+     * @Route("/connect/google/check", name="user.connect_google_check")
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function ConnectGoogleCheck(Request $request, ClientRegistry $clientRegistry)
+    {
+        if(!$this->getUser())
+        {
+            return new JsonResponse(array('status' => false, 'message' => 'User not found!' ));
+        }
+        else{
+            $this->addFlash('success', 'Vous êtes désormais connectez !');
+            return $this->redirectToRoute('home.index');
+        }
+
+    }
 }

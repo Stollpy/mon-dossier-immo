@@ -14,6 +14,15 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+        
+        # google:
+        #     pattern: ^/
+        #     logout:
+        #         path: sucurity.logout
+        #     guard:
+        #         authenticators:
+        #             - App\Secuirty\GoogleAuthentificator
+
         main:
             anonymous: true
             lazy: true
@@ -21,8 +30,11 @@ security:
             guard:
                 authenticators:
                     - App\Security\LoginFormAuthenficator
+                    - App\Security\GoogleAuthentificator
+                entry_point: App\Security\LoginFormAuthenficator
             logout:
                 path: security.logout
+
                 # where to redirect after logout
                 # target: app_any_route
 
@@ -37,3 +49,12 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+        
+knpu_oauth2_client:
+    clients:
+        google:
+            type: google
+            client_id: '%env(resolve:GOOGLE_ID_CLIENT)%'
+            client_secret: '%env(resolve:GOOGLE_SECRET_KEY)%'
+            redirect_route: user.connect_google_check
+            redirect_params: {}
