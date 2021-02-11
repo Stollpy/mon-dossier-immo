@@ -294,38 +294,4 @@ class UserController extends AbstractController
         return $this->redirectToRoute('security.logout');
 
      }
-
-    /**
-     * @Route("/connect/google", name="user.connect_google")
-     * @param ClientRegistry $clientRegistry
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function ConnectGoogle(ClientRegistry $clientRegistry)
-    {
-        return $clientRegistry
-            ->getClient('google')
-            ->redirect([
-                'profile', 'email'
-            ], [])
-        ;
-    }
-
-
-     /**
-     * @param Request $request
-     * @Route("/connect/google/check", name="user.connect_google_check")
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function ConnectGoogleCheck(Request $request, ClientRegistry $clientRegistry)
-    {
-        if(!$this->getUser())
-        {
-            return new JsonResponse(array('status' => false, 'message' => 'User not found!' ));
-        }
-        else{
-            $this->addFlash('success', 'Vous êtes désormais connectez !');
-            return $this->redirectToRoute('home.index');
-        }
-
-    }
 }

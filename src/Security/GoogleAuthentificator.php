@@ -106,7 +106,7 @@ class GoogleAuthentificator  extends SocialAuthenticator
         return $this->clientRegistry->getClient('google');
     }
 
-         /**
+    /**
      *
      * @param Request $request
      * @param AuthenticationException|null $authException

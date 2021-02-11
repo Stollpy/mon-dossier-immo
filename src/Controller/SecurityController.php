@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
@@ -32,5 +35,39 @@ class SecurityController extends AbstractController
     public function logout()
     {
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+    }
+
+    /**
+     * @Route("/connect/google", name="user.connect_google")
+     * @param ClientRegistry $clientRegistry
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function ConnectGoogle(ClientRegistry $clientRegistry)
+    {
+        return $clientRegistry
+            ->getClient('google')
+            ->redirect([
+                'profile', 'email'
+            ], [])
+        ;
+    }
+
+
+     /**
+     * @param Request $request
+     * @Route("/connect/google/check", name="security.connect_google_check")
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function ConnectGoogleCheck(Request $request, ClientRegistry $clientRegistry)
+    {
+        if(!$this->getUser())
+        {
+            return new JsonResponse(array('status' => false, 'message' => 'User not found!' ));
+        }
+        else{
+            $this->addFlash('success', 'Vous êtes désormais connectez !');
+            return $this->redirectToRoute('home.index');
+        }
+
     }
 }

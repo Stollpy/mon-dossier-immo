@@ -47,6 +47,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ;
     }
 
+    public function loadUserByComfirmationAccount($boolean)
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.account_confirmation = :boolean')
+            ->setParameter('boolean', $boolean)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     // /**
     //  * @return User[] Returns an array of User objects
     //  */
