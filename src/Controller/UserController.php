@@ -82,7 +82,8 @@ class UserController extends AbstractController
 
 
             $this->addFlash('success', 'Votre compte à bien été créer ! Un e-mail de confirmation vous à été envoyé.');
-            return $authentificatorHandler->authenticateUserAndHandleSuccess($data, $request, $authenticator,'main');
+            $authentificatorHandler->authenticateUserAndHandleSuccess($data, $request, $authenticator,'main');
+            return $this->redirectToRoute('user.account_confirmation', ['title' => 'Votre Compte à bien été créer !']);
         }
         
         return $this->render('user/index.html.twig', [
@@ -91,11 +92,11 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("/account-confirmation/{id}/{token}", name="user.account_confirmation")
+     * @Route("/account-confirmation/{id}/{token}", name="user.account_confirmation.check")
      * @param User $user
      */
 
-    public function accountConfirmation($token, User $user)
+    public function accountConfirmationCheck($token, User $user)
     {
         if($user->getTokenAccount() === null || $token !== $user->getTokenAccount()){
             $this->addFlash('error', 'Vous n\'êtes pas autorisé à être sur cette page !');
@@ -111,6 +112,18 @@ class UserController extends AbstractController
         $this->addFlash('success', 'Votre compte à bien été activé, veuillez vous reconnectez.');
        
         return $this->redirectToRoute('security.login');
+    }
+
+    /**
+     * @Route ("/account-confirmation/{title}", name="user.account_confirmation")
+     * @param string $tilte
+     */
+    public function accountConfirmation(string $title)
+    {
+
+        return $this->render('user/accountConfirmation/index.html.twig', [
+            'title' => $title
+        ]);
     }
 
     /**

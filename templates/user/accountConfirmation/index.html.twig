@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h1>{{ title }}</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-outline-primary">
+                            <div class="spinner-border text-primary d-none" role="status">
+                                <span class="visually-hidden">loading ...</span>
+                            </div>
+                            <span class="btn-title">Me redirigez sur la page d'acceuil</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="/assets/js/RedirectHome.js"></script>
+{% endblock %}
