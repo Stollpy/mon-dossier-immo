@@ -11,7 +11,11 @@
                 {{ form_widget(form) }}
                 <div class="row">
                     <div class="col-3">
-                        <button type="submit" class="btn btn-outline-primary mt-3">Modifier</button>
+                        {% if not user.password == null %}
+                            <button type="submit" class="btn btn-outline-primary mt-3">Modifier</button>
+                        {% else %}
+                            <p> Les informations du compte ont été renvoyé par Google. Vous ne pouvez donc pas les modifiers.</p>
+                        {% endif %} 
                     </div>
                     <div class="col-9 text-start">
                         <a href="{{ path('user.remove', {'id' : app.user.id}) }}" class="btn btn-outline-danger mt-3">Supprimer mon compte</a>

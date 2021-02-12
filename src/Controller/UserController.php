@@ -252,6 +252,7 @@ class UserController extends AbstractController
 
         return $this->render('user/Dashboard/index.html.twig', [
             'form' => $form->createView(),
+            'user' => $user
         ]);
     }
 
