@@ -226,7 +226,7 @@ class UserController extends AbstractController
     }
   
     /**
-     * @Route("/user/edit/{id<\d+>}", name="user.edit")
+     * @Route("/user/dashboard/edit/{id<\d+>}", name="user.edit")
      * @param User $user
      * @param Request $request
      */
@@ -238,6 +238,7 @@ class UserController extends AbstractController
         $form = $this->createForm(EditUserType::class, $user);
         $form->handleRequest($request);
 
+
         if($form->isSubmitted() && $form->isValid()){
             $data = $form->getData();
 
@@ -248,9 +249,9 @@ class UserController extends AbstractController
             $this->addFlash('success', 'Vos information on bien été modifier !');
             return $this->redirectToRoute('user.edit', ['id' => $id]);
         }
-        
+
         return $this->render('user/Dashboard/index.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 
@@ -283,9 +284,11 @@ class UserController extends AbstractController
             return $this->redirectToRoute('security.login');
             
         }
-
+        $passwordUser = $user->getPassword();
+        
         return $this->render('user/Dashboard/edit-password.html.twig', [
-                'form' => $form->createView()
+                'form' => $form->createView(),
+                'password' => $passwordUser
         ]);
      }
 

@@ -12,8 +12,15 @@
                 {% else %}
                     {{ form_start(form) }}
                     {{ form_widget(form) }}
-                    <button type="submit" class="btn btn-outline-primary rounded mt-3">Créer mon compte</button>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-outline-primary rounded mt-3">Créer mon compte</button>
+                        </div>
                     {{ form_end(form) }}
+                        <div class="col-12">
+                            <a href="{{ path('user.connect_google') }}" class="btn btn-outline-primary mt-3">Connexion via <i class="fab fa-google"></i></a>
+                        </div>
+                    </div>
                 {% endif %}
             </div>
         </div>
