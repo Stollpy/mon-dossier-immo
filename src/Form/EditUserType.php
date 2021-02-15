@@ -23,22 +23,6 @@ class EditUserType extends AbstractType
                     new NotBlank()
                 ]
             ])
-            ->add('lastname', TextType::class, [
-                'label' => 'Votre nom',
-                'attr' => ['class' => 'form-control'],
-                'required' => true,
-                'constraints' => [
-                    new NotBlank()
-                ]
-            ])
-            ->add('firstname', TextType::class, [
-                'label' => 'Votre prénom',
-                'attr' => ['class' => 'form-control'],
-                'required' => true,
-                'constraints' => [
-                    new NotBlank()
-                ]
-            ])
         ;
     }
 

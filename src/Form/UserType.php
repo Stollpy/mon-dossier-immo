@@ -41,22 +41,6 @@ class UserType extends AbstractType
                         ])
                     ]
             ])
-            ->add('lastname', TextType::class, [
-                'label' => 'Votre nom',
-                'constraints' => [
-                    new NotBlank()
-                ], 
-                'required' => true,
-                'attr' => ['class' =>'form-control']
-            ])
-            ->add('firstname', TextType::class, [
-                'label' => 'Votre prénom',
-                'constraints' => [
-                    new NotBlank()
-                ], 
-                'required' => true,
-                'attr' => ['class' =>'form-control']
-            ])
         ;
     }
 

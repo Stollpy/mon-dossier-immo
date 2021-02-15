@@ -1,29 +1,27 @@
 {% extends "base.html.twig" %}
 
-{% block title %}Dashboard Client - Edit profil {% endblock %}
-
 {% block body %}
 <div class="container-fluid">
     <div class="container">
         <div class="row">
             <div class="col-12">
-                {{ form_start(form) }}
-                {{ form_widget(form) }}
-                <div class="row">
-                    <div class="col-3">
-                        {% if not user.password == null %}
-                            <button type="submit" class="btn btn-outline-primary mt-3">Modifier</button>
-                        {% else %}
-                            <p> Les informations du compte ont été renvoyé par Google. Vous ne pouvez donc pas les modifiers.</p>
-                        {% endif %} 
+                <nav class="navbar navbar-expand navbar-light bg-transparent">
+                    <div class="container-fluid">
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="{{ path('user.edit', {'id' : app.user.id}) }}">Changer mes informations de compte</a>
+                                </li>
+                                <li class="nav-item">
+                                <a class="nav-link" href="{{ path('user.edit-password', {'id' : app.user.id}) }}">Changer mon mot de passe</a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="col-9 text-start">
-                        <a href="{{ path('user.remove', {'id' : app.user.id}) }}" class="btn btn-outline-danger mt-3">Supprimer mon compte</a>
-                    </div>
-                </div>
-                {{ form_end(form) }}
+                </nav>
             </div>
         </div>
     </div>
 </div>
+{% block functionality %}{% endblock %}
 {% endblock %}

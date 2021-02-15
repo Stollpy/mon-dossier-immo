@@ -5,7 +5,9 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use App\Entity\Individual;
 use App\Form\EditUserType;
+use App\Entity\IndividualData;
 use App\Form\EditUserPasswordType;
 use App\Form\PasswordRecoveryType;
 use App\Repository\UserRepository;
@@ -102,12 +104,33 @@ class UserController extends AbstractController
             $this->addFlash('error', 'Vous n\'êtes pas autorisé à être sur cette page !');
             return $this->redirectToRoute('home.index');
         }
+       
 
+        $individual = new Individual();
+        $individual->setUser($user);
+        $this->manager->persist($individual);
 
+        $keyData = [
+            "Prénom" => "firstname",
+            "Nom" => "lastname"
+        ];
+
+        foreach ($keyData as $key => $value){
+            $individualData = new IndividualData();
+            $individualData->setIndividual($individual);
+            $individualData->setLabel($key);
+            $individualData->setCode($value);
+            $this->manager->persist($individualData);
+        }
+        
+
+        $user->setIndividual($individual);
         $user->setTokenAccount(NULL);
         $user->setAccountConfirmation(1);
         $this->manager->persist($user);
+
         $this->manager->flush();
+
 
         $this->addFlash('success', 'Votre compte à bien été activé, veuillez vous reconnectez.');
        
@@ -250,7 +273,7 @@ class UserController extends AbstractController
             return $this->redirectToRoute('user.edit', ['id' => $id]);
         }
 
-        return $this->render('user/Dashboard/index.html.twig', [
+        return $this->render('user/Dashboard/update.html.twig', [
             'form' => $form->createView(),
             'user' => $user
         ]);
@@ -311,4 +334,12 @@ class UserController extends AbstractController
         return $this->redirectToRoute('security.logout');
 
      }
+
+     /**
+      * @Route("user/mes-informations/{id</d+>}", name="user.information")
+      */
+      public function EditInformations()
+      {
+          
+      }
 }

@@ -38,7 +38,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/connect/google", name="user.connect_google")
+     * @Route("/connect/google", name="security.connect_google")
      * @param ClientRegistry $clientRegistry
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -54,15 +54,16 @@ class SecurityController extends AbstractController
 
 
      /**
-     * @param Request $request
      * @Route("/connect/google/check", name="security.connect_google_check")
+     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function ConnectGoogleCheck(Request $request, ClientRegistry $clientRegistry)
     {
         if(!$this->getUser())
         {
-            return new JsonResponse(array('status' => false, 'message' => 'User not found!' ));
+            $this->addFlash('error', 'Une erreur c\'est produit lors de l\'authentification via Google !');
+            return $this->redirectToRoute('security.login');
         }
         else{
             $this->addFlash('success', 'Vous êtes désormais connectez !');

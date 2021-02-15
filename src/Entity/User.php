@@ -48,18 +48,6 @@ class User implements UserInterface
     private $password;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
-     */
-    private $lastname;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
-     */
-    private $firstname;
-
-    /**
      * @ORM\Column(type="datetime")
      */
     private $createdAt;
@@ -83,6 +71,11 @@ class User implements UserInterface
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $password_requestedAt;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Individual::class, mappedBy="user", cascade={"persist", "remove"})
+     */
+    private $individual;
 
     public function getId(): ?int
     {
@@ -165,30 +158,6 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-    public function getLastname(): ?string
-    {
-        return $this->lastname;
-    }
-
-    public function setLastname(string $lastname): self
-    {
-        $this->lastname = $lastname;
-
-        return $this;
-    }
-
-    public function getFirstname(): ?string
-    {
-        return $this->firstname;
-    }
-
-    public function setFirstname(string $firstname): self
-    {
-        $this->firstname = $firstname;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->createdAt;
@@ -245,6 +214,23 @@ class User implements UserInterface
     public function setPasswordRequestedAt(?\DateTimeInterface $password_requestedAt): self
     {
         $this->password_requestedAt = $password_requestedAt;
+
+        return $this;
+    }
+
+    public function getIndividual(): ?Individual
+    {
+        return $this->individual;
+    }
+
+    public function setIndividual(Individual $individual): self
+    {
+        // set the owning side of the relation if necessary
+        if ($individual->getUser() !== $this) {
+            $individual->setUser($this);
+        }
+
+        $this->individual = $individual;
 
         return $this;
     }
