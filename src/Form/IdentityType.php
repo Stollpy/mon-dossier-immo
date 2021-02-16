@@ -10,14 +10,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class IdentityType extends AbstractType
 {
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        
+
         $builder
             ->add('firstname', TextType::class,[
                 'label' => 'Prénom',
                 'required' => true,
-                'attr' => ['class' =>'form-control'],
+                'attr' => ['class' => 'form-control'],
                 'constraints' => [
                     new NotBlank()
                 ]
@@ -25,7 +26,7 @@ class IdentityType extends AbstractType
             ->add('lastname', TextType::class,[
                 'label' => 'Nom',
                 'required' => true,
-                'attr' => ['class' =>'form-control'],
+                'attr' => ['class' => 'form-control'],
                 'constraints' => [
                     new NotBlank()
                 ]

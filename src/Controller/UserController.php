@@ -9,14 +9,17 @@ use App\Entity\Individual;
 use App\Form\EditUserType;
 use App\Form\IdentityType;
 use App\Entity\IndividualData;
+use App\Entity\ProfilModelData;
 use App\Form\EditUserPasswordType;
 use App\Form\PasswordRecoveryType;
 use App\Repository\UserRepository;
 use App\Form\PasswordResettingType;
+use App\Services\IndividualDataService;
 use App\Security\LoginFormAuthenficator;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\IndividualDataRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use App\Repository\ProfilModelDataRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -98,9 +101,10 @@ class UserController extends AbstractController
     /**
      * @Route("/account-confirmation/{id}/{token}", name="user.account_confirmation.check")
      * @param User $user
+     * @param IndividualDataService $dataService
      */
 
-    public function accountConfirmationCheck($token, User $user)
+    public function accountConfirmationCheck($token, User $user, IndividualDataService $dataService)
     {
         if($user->getTokenAccount() === null || $token !== $user->getTokenAccount()){
             $this->addFlash('error', 'Vous n\'êtes pas autorisé à être sur cette page !');
@@ -110,21 +114,9 @@ class UserController extends AbstractController
 
         $individual = new Individual();
         $individual->setUser($user);
-        $this->manager->persist($individual);
-
-        $keyData = [
-            "Prénom" => "firstname",
-            "Nom" => "lastname"
-        ];
-
-        foreach ($keyData as $key => $value){
-            $individualData = new IndividualData();
-            $individualData->setIndividual($individual);
-            $individualData->setLabel($key);
-            $individualData->setCode($value);
-            $this->manager->persist($individualData);
-        }
+        $this->manager->persist($individual); 
         
+        $dataService->CreateIndividualData($individual, ['1' => 'firstname', '2' => 'lastname', '3' => 'birth_date']);
 
         $user->setIndividual($individual);
         $user->setTokenAccount(NULL);
@@ -340,32 +332,34 @@ class UserController extends AbstractController
      /**
       * @Route("user/mes-informations/{id}", name="user.information")
       * @param Request $request
-      * @param IndividualDataRepository $individualDataRepository
+      * @param IndividualDataService $individualDataService
+      * @param User $user
       */
-      public function EditInformations(Request $request, IndividualDataRepository $individualDataRepository)
+      public function EditInformations(Request $request, IndividualDataService $individualDataService, User $user, IndividualDataRepository $individualDataRepository)
       {
           $form = $this->createForm(IdentityType::class);
           $form->handleRequest($request);
 
           if($form->isSubmitted() && $form->isValid()){
             
-            // $formData = $form->getData();
-            $user = $this->getUser();
             $individual = $user->getIndividual();
 
-            $firstname = $individualDataRepository->findOneBy(['individual' => $individual, 'code' => 'firstname']);
-
+            $firstname = $individualDataRepository->getDataByCode($individual, 'firstname');
             $firstname->setData($form->get('firstname')->getData());
             $this->manager->persist($firstname);
 
-            $lastname = $individualDataRepository->findOneBy(['individual' => $individual, 'code' => 'lastname']);
+            $lastname = $individualDataRepository->getDataByCode($individual, 'lastname');
             $lastname->setData($form->get('lastname')->getData());
             $this->manager->persist($lastname);
+
+
 
             $this->manager->flush();
 
 
-
+            $id = $this->getUser()->getId();
+            $this->addFlash('success', 'Vos données ont bien été mdofié');
+            return $this->redirectToRoute('user.information', ['id' => $id]);
 
           }
 

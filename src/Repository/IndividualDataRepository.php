@@ -2,9 +2,11 @@
 
 namespace App\Repository;
 
+use App\Entity\Individual;
 use App\Entity\IndividualData;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\ProfilModelDataRepository;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method IndividualData|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,37 +16,50 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class IndividualDataRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+
+    private $profileModelDataRepository;
+
+    public function __construct(ManagerRegistry $registry, ProfilModelDataRepository $profileModelDataRepository)
     {
         parent::__construct($registry, IndividualData::class);
+        $this->profileModelDataRepository = $profileModelDataRepository;
+
     }
 
-    // /**
-    //  * @return IndividualData[] Returns an array of IndividualData objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @return IndividualData[] Returns an array of IndividualData objects
+     */
+    
+    public function getDataByCategory(Individual $individual, string $category)
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('i.id', 'ASC')
-            ->setMaxResults(10)
+            ->innerJoin('i.profilModelData', 'profil')
+            ->addSelect('profil')
+            ->innerJoin('profil.individualDataCategory', 'category')
+            ->addSelect('category')
+            ->andWhere('category.code = :category')
+            ->andWhere('i.individual = :individual')
+            ->setParameter('individual', $individual)
+            ->setParameter('category', $category)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?IndividualData
+    
+    public function getDataByCode(Individual $individual, string $code): ?IndividualData
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
+            ->innerJoin('i.profilModelData', 'profil')
+            ->andWhere('i.individual = :individual')
+            ->addSelect('profil')
+            ->andWhere('profil.code = :code')
+            ->setParameter('individual', $individual)
+            ->setParameter('code', $code)
             ->getQuery()
             ->getOneOrNullResult()
+
         ;
     }
-    */
+    
 }

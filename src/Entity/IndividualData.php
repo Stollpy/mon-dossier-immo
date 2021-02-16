@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Repository\IndividualDataRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -23,24 +22,14 @@ class IndividualData
     private $individual;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $label;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $code;
-
-    /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $data;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\ManyToOne(targetEntity=ProfilModelData::class, inversedBy="IndividualData")
      */
-    private $type;
+    private $profilModelData;
 
     public function getId(): ?int
     {
@@ -59,30 +48,6 @@ class IndividualData
         return $this;
     }
 
-    public function getLabel(): ?string
-    {
-        return $this->label;
-    }
-
-    public function setLabel(string $label): self
-    {
-        $this->label = $label;
-
-        return $this;
-    }
-
-    public function getCode(): ?string
-    {
-        return $this->code;
-    }
-
-    public function setCode(string $code): self
-    {
-        $this->code = $code;
-
-        return $this;
-    }
-
     public function getData(): ?string
     {
         return $this->data;
@@ -95,14 +60,14 @@ class IndividualData
         return $this;
     }
 
-    public function getType(): ?string
+    public function getProfilModelData(): ?ProfilModelData
     {
-        return $this->type;
+        return $this->profilModelData;
     }
 
-    public function setType(string $type): self
+    public function setProfilModelData(?ProfilModelData $profilModelData): self
     {
-        $this->type = $type;
+        $this->profilModelData = $profilModelData;
 
         return $this;
     }
