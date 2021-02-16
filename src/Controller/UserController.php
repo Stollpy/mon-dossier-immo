@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Form\UserType;
 use App\Entity\Individual;
 use App\Form\EditUserType;
+use App\Form\IdentityType;
 use App\Entity\IndividualData;
 use App\Form\EditUserPasswordType;
 use App\Form\PasswordRecoveryType;
@@ -14,6 +15,7 @@ use App\Repository\UserRepository;
 use App\Form\PasswordResettingType;
 use App\Security\LoginFormAuthenficator;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\IndividualDataRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
@@ -336,10 +338,39 @@ class UserController extends AbstractController
      }
 
      /**
-      * @Route("user/mes-informations/{id</d+>}", name="user.information")
+      * @Route("user/mes-informations/{id}", name="user.information")
+      * @param Request $request
+      * @param IndividualDataRepository $individualDataRepository
       */
-      public function EditInformations()
+      public function EditInformations(Request $request, IndividualDataRepository $individualDataRepository)
       {
-          
+          $form = $this->createForm(IdentityType::class);
+          $form->handleRequest($request);
+
+          if($form->isSubmitted() && $form->isValid()){
+            
+            // $formData = $form->getData();
+            $user = $this->getUser();
+            $individual = $user->getIndividual();
+
+            $firstname = $individualDataRepository->findOneBy(['individual' => $individual, 'code' => 'firstname']);
+
+            $firstname->setData($form->get('firstname')->getData());
+            $this->manager->persist($firstname);
+
+            $lastname = $individualDataRepository->findOneBy(['individual' => $individual, 'code' => 'lastname']);
+            $lastname->setData($form->get('lastname')->getData());
+            $this->manager->persist($lastname);
+
+            $this->manager->flush();
+
+
+
+
+          }
+
+          return $this->render('user/Dashboard/information/identity/index.html.twig', [
+            'form' => $form->createView(),
+          ]);
       }
 }

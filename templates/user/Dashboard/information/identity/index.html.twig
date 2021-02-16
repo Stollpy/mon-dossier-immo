@@ -1,0 +1,18 @@
+{% extends "user/Dashboard/information/base.html.twig"%}
+
+{% block title %}Dashboard - Mon identité{% endblock %}
+
+{% block functionality %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <input type="submit" class="btn btn-outline-primary mt-3" value="Modifier">
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use App\Repository\IndividualDataRepository;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -13,12 +12,12 @@ class IdentityType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        // $individualData = new IndividualDataRepository()->findBy(['individual_id' => $id]);
         
         $builder
             ->add('firstname', TextType::class,[
                 'label' => 'Prénom',
                 'required' => true,
+                'attr' => ['class' =>'form-control'],
                 'constraints' => [
                     new NotBlank()
                 ]
@@ -26,6 +25,7 @@ class IdentityType extends AbstractType
             ->add('lastname', TextType::class,[
                 'label' => 'Nom',
                 'required' => true,
+                'attr' => ['class' =>'form-control'],
                 'constraints' => [
                     new NotBlank()
                 ]
@@ -38,10 +38,5 @@ class IdentityType extends AbstractType
         $resolver->setDefaults([
             // Configure your form options here
         ]);
-    }
-
-    public function Individual(IndividualDataRepository $individualDataRepository, $id)
-    {
-        return $individualDataRepository->findBy(['individual_id' => $id]);
     }
 }
