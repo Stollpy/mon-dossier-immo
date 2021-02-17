@@ -30,9 +30,27 @@ class Individual
      */
     private $individualData;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Individual::class, inversedBy="individuals")
+     */
+    private $garant;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Individual::class, mappedBy="garant")
+     */
+    private $individuals;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Profiles::class, inversedBy="individuals")
+     */
+    private $profiles;
+
     public function __construct()
     {
         $this->individualData = new ArrayCollection();
+        $this->garant = new ArrayCollection();
+        $this->individuals = new ArrayCollection();
+        $this->profiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -78,6 +96,81 @@ class Individual
                 $individualData->setIndividual(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|self[]
+     */
+    public function getGarant(): Collection
+    {
+        return $this->garant;
+    }
+
+    public function addGarant(self $garant): self
+    {
+        if (!$this->garant->contains($garant)) {
+            $this->garant[] = $garant;
+        }
+
+        return $this;
+    }
+
+    public function removeGarant(self $garant): self
+    {
+        $this->garant->removeElement($garant);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|self[]
+     */
+    public function getIndividuals(): Collection
+    {
+        return $this->individuals;
+    }
+
+    public function addIndividual(self $individual): self
+    {
+        if (!$this->individuals->contains($individual)) {
+            $this->individuals[] = $individual;
+            $individual->addGarant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIndividual(self $individual): self
+    {
+        if ($this->individuals->removeElement($individual)) {
+            $individual->removeGarant($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|profiles[]
+     */
+    public function getProfiles(): Collection
+    {
+        return $this->profiles;
+    }
+
+    public function addProfile(profiles $profile): self
+    {
+        if (!$this->profiles->contains($profile)) {
+            $this->profiles[] = $profile;
+        }
+
+        return $this;
+    }
+
+    public function removeProfile(profiles $profile): self
+    {
+        $this->profiles->removeElement($profile);
 
         return $this;
     }

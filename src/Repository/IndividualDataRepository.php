@@ -2,7 +2,6 @@
 
 namespace App\Repository;
 
-use App\Entity\Individual;
 use App\Entity\IndividualData;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Repository\ProfilModelDataRepository;
@@ -30,14 +29,16 @@ class IndividualDataRepository extends ServiceEntityRepository
      * @return IndividualData[] Returns an array of IndividualData objects
      */
     
-    public function getDataByCategory(Individual $individual, string $category)
+    public function getDataByCategory($individual, string $category)
     {
         return $this->createQueryBuilder('i')
             ->innerJoin('i.profilModelData', 'profil')
             ->addSelect('profil')
+
             ->innerJoin('profil.individualDataCategory', 'category')
             ->addSelect('category')
             ->andWhere('category.code = :category')
+
             ->andWhere('i.individual = :individual')
             ->setParameter('individual', $individual)
             ->setParameter('category', $category)
@@ -47,19 +48,18 @@ class IndividualDataRepository extends ServiceEntityRepository
     }
 
     
-    public function getDataByCode(Individual $individual, string $code): ?IndividualData
+    public function getDataByCode($individual, string $code): ?IndividualData
     {
         return $this->createQueryBuilder('i')
             ->innerJoin('i.profilModelData', 'profil')
-            ->andWhere('i.individual = :individual')
             ->addSelect('profil')
             ->andWhere('profil.code = :code')
-            ->setParameter('individual', $individual)
             ->setParameter('code', $code)
+
+            ->andWhere('i.individual = :individual')
+            ->setParameter('individual', $individual)
             ->getQuery()
             ->getOneOrNullResult()
-
         ;
     }
-    
 }

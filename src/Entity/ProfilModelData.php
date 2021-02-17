@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+use App\Entity\IndividualDataCategory;
+use Doctrine\Common\Collections\Collection;
 use App\Repository\ProfilModelDataRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=ProfilModelDataRepository::class)
@@ -45,9 +46,15 @@ class ProfilModelData
      */
     private $individualDataCategory;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Profiles::class, mappedBy="profileModelData")
+     */
+    private $profiles;
+
     public function __construct()
     {
         $this->IndividualData = new ArrayCollection();
+        $this->profiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -129,6 +136,33 @@ class ProfilModelData
     public function setIndividualDataCategory(?IndividualDataCategory $individualDataCategory): self
     {
         $this->individualDataCategory = $individualDataCategory;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Profiles[]
+     */
+    public function getProfiles(): Collection
+    {
+        return $this->profiles;
+    }
+
+    public function addProfile(Profiles $profile): self
+    {
+        if (!$this->profiles->contains($profile)) {
+            $this->profiles[] = $profile;
+            $profile->addProfileModelData($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProfile(Profiles $profile): self
+    {
+        if ($this->profiles->removeElement($profile)) {
+            $profile->removeProfileModelData($this);
+        }
 
         return $this;
     }

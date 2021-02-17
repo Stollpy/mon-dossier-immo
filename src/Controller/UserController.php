@@ -14,6 +14,7 @@ use App\Form\EditUserPasswordType;
 use App\Form\PasswordRecoveryType;
 use App\Repository\UserRepository;
 use App\Form\PasswordResettingType;
+use App\Repository\ProfilesRepository;
 use App\Services\IndividualDataService;
 use App\Security\LoginFormAuthenficator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,10 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -52,9 +50,10 @@ class UserController extends AbstractController
      * @param UserPasswordEncoderInterface $encoder
      * @param GuardAuthenticator $authentificatorHandler
      * @param LoginFormAuthentificator $authentificator
+     * @param ProfilesRepository $profilsRepository
      */
     public function signup(Request $request, UserPasswordEncoderInterface $encoder, 
-                GuardAuthenticatorHandler $authentificatorHandler, LoginFormAuthenficator $authenticator): Response
+                GuardAuthenticatorHandler $authentificatorHandler, LoginFormAuthenficator $authenticator, ProfilesRepository $profilsRepository): Response
     {
         $form = $this->createForm(UserType::class);
         $form->handleRequest($request);
@@ -62,7 +61,6 @@ class UserController extends AbstractController
         if($form->isSubmitted() && $form->isValid()){
            
             $data = $form->getData();
-           
             $plainPassword = $form->get('plainPassword')->getData();
             $hashedPassword = $encoder->encodePassword($data, $plainPassword);
             
@@ -71,6 +69,15 @@ class UserController extends AbstractController
             $data->setAccountConfirmation(false);
         
             $this->manager->persist($data);
+
+            $dataProfile = $form->get('profiles')->getData();
+            $profile = $profilsRepository->findOneBy(['code' => $dataProfile]);
+            
+            $individual = new Individual();
+            $individual->setUser($data);
+            $individual->addProfile($profile);
+            $this->manager->persist($individual); 
+
             $this->manager->flush();
 
             $userMail = $data->getEmail();
@@ -112,11 +119,8 @@ class UserController extends AbstractController
         }
        
 
-        $individual = new Individual();
-        $individual->setUser($user);
-        $this->manager->persist($individual); 
-        
-        $dataService->CreateIndividualData($individual, ['1' => 'firstname', '2' => 'lastname', '3' => 'birth_date']);
+        $individual = $user->getIndividual();
+        $dataService->CreateIndividualData($individual);
 
         $user->setIndividual($individual);
         $user->setTokenAccount(NULL);
@@ -332,18 +336,21 @@ class UserController extends AbstractController
      /**
       * @Route("user/mes-informations/{id}", name="user.information")
       * @param Request $request
-      * @param IndividualDataService $individualDataService
+      * @param IndividualDataRepository $individualDataRepository
+      * @param ProfilModelDataRepository $profilModelDataRepository
       * @param User $user
       */
-      public function EditInformations(Request $request, IndividualDataService $individualDataService, User $user, IndividualDataRepository $individualDataRepository)
+      public function EditInformations(Request $request, User $user, IndividualDataRepository $individualDataRepository, ProfilModelDataRepository $profilModelDataRepository)
       {
-          $form = $this->createForm(IdentityType::class);
+          $individual = $user->getIndividual();
+        //   $profils = $profilModelDataRepository->getModelByIndividual($individual);
+          $form = $this->createForm(IdentityType::class); //, ["data_repository" => $profils]);
           $form->handleRequest($request);
 
           if($form->isSubmitted() && $form->isValid()){
-            
-            $individual = $user->getIndividual();
 
+            $individual = $user->getIndividual();
+            
             $firstname = $individualDataRepository->getDataByCode($individual, 'firstname');
             $firstname->setData($form->get('firstname')->getData());
             $this->manager->persist($firstname);
@@ -352,13 +359,14 @@ class UserController extends AbstractController
             $lastname->setData($form->get('lastname')->getData());
             $this->manager->persist($lastname);
 
-
+            $birth_date = $individualDataRepository->getDataByCode($individual, 'birth_date');
+            $birth_date->setData(date_format($form->get('birth_date')->getData(),'Y-m-d'));
+            $this->manager->persist($birth_date);
 
             $this->manager->flush();
 
-
-            $id = $this->getUser()->getId();
-            $this->addFlash('success', 'Vos données ont bien été mdofié');
+            $id = $user->getId();
+            $this->addFlash('success', 'Vos données ont bien été modifié');
             return $this->redirectToRoute('user.information', ['id' => $id]);
 
           }

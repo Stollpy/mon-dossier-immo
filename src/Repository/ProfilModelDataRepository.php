@@ -19,32 +19,56 @@ class ProfilModelDataRepository extends ServiceEntityRepository
         parent::__construct($registry, ProfilModelData::class);
     }
 
-    // /**
-    //  * @return ProfilModelData[] Returns an array of ProfilModelData objects
-    //  */
-    /*
-    public function findByExampleField($value)
+     /**
+      * @return ProfilModelData[] Returns an array of ProfilModelData objects
+      */
+    
+    public function getModelByProfil($code)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
+            ->innerJoin('p.profiles', 'profiles')
+            ->addSelect('profiles')
+            ->andWhere('profiles.code = :code')
+
+            ->setParameter('code', $code)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+    
 
-    /*
-    public function findOneBySomeField($value): ?ProfilModelData
+    
+    public function getModelByProfilesAndCode($profiles, string $code): ?ProfilModelData
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
+            // ->innerJoin('p.profiles', 'profiles')
+            // ->addSelect('profiles')
+            
+            // ->innerJoin('profiles.profilModelData', 'models')
+            ->andWhere('p.profiles = :profiles')
+            ->setParameter('profiles', $profiles)
+
+            ->andWhere('p.code = :code')
+            ->setParameter('code', $code)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
-    */
+    
+        /**
+      * @return ProfilModelData[] Returns an array of ProfilModelData objects
+      */
+    
+      public function getModelByIndividual($individual)
+      {
+          return $this->createQueryBuilder('p')
+              ->innerJoin('p.IndividualData', 'data')
+              ->addSelect('data')
+              ->andWhere('data.individual = :individual')
+  
+              ->setParameter('individual', $individual)
+              ->getQuery()
+              ->getResult()
+          ;
+      }
 }
