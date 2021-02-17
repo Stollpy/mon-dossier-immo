@@ -23,41 +23,43 @@ class IdentityType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $individual = $this->security->getUser()->getIndividual();
-        $profils = $this->profilModelData->getModelByIndividual($individual);//$options['data_repository'];
-       
-        foreach ($profils as $profil){
+        $profils = $this->security->getUser()->getIndividual()->getProfiles();
 
-            $code = $profil->getCode();
-            $type = $profil->getType();
-            $label = $profil->getLabel();
+        foreach($profils as $profil){
 
             $types = [
                 "text" => TextType::class,
                 "date" => DateType::class,
                 "tel" => TelType::class,
             ];
+            $code = $profil->getCode();
+            
+            $models = $this->profilModelData->getModelByProfil($code);
 
-            $codes = [];
-            if(!in_array($code, $codes)){
-                array_push($codes, $code);
-                if(array_key_exists($type, $types)){
-                    $builder
-                    ->add($code, $types[$type],[
-                        'label' => $label,
-                        'required' => true,
-                        'attr' => ['class' => 'form-control'],
-                        'constraints' => [
-                            new NotBlank()
-                        ]
-                    ]);
-                }else{
-                    return null;
+            foreach($models as $model){
+                $code = $model->getCode();
+                $type = $model->getType();
+                $label = $model->getLabel();
+    
+                $codes = [];
+                if(!in_array($code, $codes)){
+                    array_push($codes, $code);
+                    if(array_key_exists($type, $types)){
+                        $builder
+                        ->add($code, $types[$type],[
+                            'label' => $label,
+                            'required' => true,
+                            'attr' => ['class' => 'form-control'],
+                            'constraints' => [
+                                new NotBlank()
+                            ]
+                        ]);
+                    }else{
+                        return null;
+                    }
                 }
             }
-
-
-
+            // End Foreach 
         }
     }
 
