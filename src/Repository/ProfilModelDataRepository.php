@@ -35,6 +35,28 @@ class ProfilModelDataRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+
+        /**
+      * @return ProfilModelData[] Returns an array of ProfilModelData objects
+      */
+    
+      public function getModelByProfilAndCategory($code, $category)
+      {
+          return $this->createQueryBuilder('p')
+              ->innerJoin('p.profiles', 'profiles')
+              ->addSelect('profiles')
+              ->andWhere('profiles.code = :code')
+              ->setParameter('code', $code)
+
+              ->innerJoin('p.individualDataCategory', 'category')
+              ->addSelect('category')
+              ->andWhere('category.code = :category')
+              ->setParameter('category', $category)
+
+              ->getQuery()
+              ->getResult()
+          ;
+      }
     
 
     
@@ -55,7 +77,7 @@ class ProfilModelDataRepository extends ServiceEntityRepository
         ;
     }
     
-        /**
+    /**
       * @return ProfilModelData[] Returns an array of ProfilModelData objects
       */
     

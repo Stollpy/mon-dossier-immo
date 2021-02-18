@@ -47,6 +47,43 @@ class IndividualDataRepository extends ServiceEntityRepository
         ;
     }
 
+    /**
+     * @return IndividualData[] Returns an array of IndividualData objects
+     */
+    
+    public function getDataByIndividual($individual)
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.individual = :individual')
+            ->setParameter('individual', $individual)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+      /**
+     * @return IndividualData[] Returns an array of IndividualData objects
+     */
+    
+    public function getDataByIndividualAndProfile($individual, $profile)
+    {
+        return $this->createQueryBuilder('i')
+            ->andWhere('i.individual = :individual')
+            ->setParameter('individual', $individual)
+
+            ->innerJoin('i.profilModelData', 'modeles')
+            ->addSelect('modeles')
+
+            ->innerJoin('modeles.profiles', 'profiles')
+            ->addSelect('profiles')
+            ->andWhere('profiles.code = :profiles')
+            ->setParameter('profiles', $profile )
+
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     
     public function getDataByCode($individual, string $code): ?IndividualData
     {

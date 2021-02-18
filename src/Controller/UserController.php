@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Entity\Individual;
+use App\Form\DocumentType;
 use App\Form\EditUserType;
 use App\Form\IdentityType;
 use App\Entity\IndividualData;
@@ -72,10 +73,14 @@ class UserController extends AbstractController
 
             $dataProfile = $form->get('profiles')->getData();
             $profile = $profilsRepository->findOneBy(['code' => $dataProfile]);
+
+            $profiles = $profile->getProfiles();
             
             $individual = new Individual();
             $individual->setUser($data);
-            $individual->addProfile($profile);
+            foreach ($profiles as $profile) {
+                $individual->addProfile($profile);
+            } 
             $this->manager->persist($individual); 
 
             $this->manager->flush();
@@ -334,45 +339,83 @@ class UserController extends AbstractController
      }
 
      /**
-      * @Route("user/mes-informations/{id}", name="user.information")
+      * @Route("user/mes-informations-locataire/{id}", name="user.information_tenant")
       * @param Request $request
+      * @param IndividualDataService $individualDataService
       * @param IndividualDataRepository $individualDataRepository
-      * @param ProfilModelDataRepository $profilModelDataRepository
       * @param User $user
       */
-      public function EditInformations(Request $request, User $user, IndividualDataRepository $individualDataRepository, ProfilModelDataRepository $profilModelDataRepository)
+      public function EditInformations(Request $request, User $user, IndividualDataService $individualDataService, IndividualDataRepository $individualDataRepository)
       {
           $individual = $user->getIndividual();
-        //   $profils = $profilModelDataRepository->getModelByIndividual($individual);
-          $form = $this->createForm(IdentityType::class); //, ["data_repository" => $profils]);
+
+          $datas = $individualDataRepository->getDataByIndividualAndProfile($individual, 'tenant');
+
+          $form = $this->createForm(IdentityType::class, null, ['data_profile' => 'tenant' ,'data_category' => 'identity']);
           $form->handleRequest($request);
 
           if($form->isSubmitted() && $form->isValid()){
 
             $individual = $user->getIndividual();
-            
-            $firstname = $individualDataRepository->getDataByCode($individual, 'firstname');
-            $firstname->setData($form->get('firstname')->getData());
-            $this->manager->persist($firstname);
-
-            $lastname = $individualDataRepository->getDataByCode($individual, 'lastname');
-            $lastname->setData($form->get('lastname')->getData());
-            $this->manager->persist($lastname);
-
-            $birth_date = $individualDataRepository->getDataByCode($individual, 'birth_date');
-            $birth_date->setData(date_format($form->get('birth_date')->getData(),'Y-m-d'));
-            $this->manager->persist($birth_date);
-
-            $this->manager->flush();
+            $individualDataService->insertIndividualData($individual, $form);
 
             $id = $user->getId();
             $this->addFlash('success', 'Vos données ont bien été modifié');
-            return $this->redirectToRoute('user.information', ['id' => $id]);
+            return $this->redirectToRoute('user.information_tenant', ['id' => $id]);
 
           }
 
+          $formDoc = $this->createForm(DocumentType::class, null, ['data_profile' => 'seller', 'data_category' => 'document', 'action' => $this->generateUrl('user.uploadDoc', ['id' => $user->getId()])]);
+
           return $this->render('user/Dashboard/information/identity/index.html.twig', [
             'form' => $form->createView(),
+            'datas' => $datas,
+            'formDoc' => $formDoc->createView(),
           ]);
       }
+
+     /**
+      * @Route("user/mes-informations-vendeur/{id}", name="user.information_seller")
+      * @param Request $request
+      * @param IndividualDataService $individualDataService
+      * @param IndividualDataRepository $individualDataRepository
+      * @param User $user
+      */
+      public function EditInformationsSeller(Request $request, User $user, IndividualDataService $individualDataService, IndividualDataRepository $individualDataRepository)
+      {
+          $individual = $user->getIndividual();
+
+          $datas = $individualDataRepository->getDataByIndividualAndProfile($individual, 'seller');
+
+          $form = $this->createForm(IdentityType::class, null, ['data_profile' => 'seller' ,'data_category' => 'identity']);
+          $form->handleRequest($request);
+
+          if($form->isSubmitted() && $form->isValid()){
+
+            $individual = $user->getIndividual();
+            $individualDataService->insertIndividualData($individual, $form);
+
+            $id = $user->getId();
+            $this->addFlash('success', 'Vos données ont bien été modifié');
+            return $this->redirectToRoute('user.information_seller', ['id' => $id]);
+
+          }
+
+          $formDoc = $this->createForm(DocumentType::class, null, ['data_profile' => 'seller', 'data_category' => 'document', 'action' => $this->generateUrl('user.uploadDoc', ['id' => $user->getId()]), 'method' => 'POST']);
+
+          return $this->render('user/Dashboard/information/identity/index.html.twig', [
+            'form' => $form->createView(),
+            'datas' => $datas,
+            'formDoc' => $formDoc->createView(),
+          ]);
+      }
+
+      /**
+       * @Route("user/mes-information-vendeur/upload/{id}", name="user.uploadDoc")
+       */
+      public function UplodadDocument()
+      {
+          dd($_POST);
+      }
+
 }

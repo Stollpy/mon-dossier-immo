@@ -3,7 +3,10 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Entity\Individual;
 use App\Repository\UserRepository;
+use App\Repository\ProfilesRepository;
+use App\Services\IndividualDataService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +40,15 @@ class GoogleAuthentificator  extends SocialAuthenticator
      */
     private $router;
 
+    /**
+     * @var ProfilesRepository
+     */
+    private $profilesRepository;
+
+    /**
+     * @var IndividualDataService
+     */
+    private $dataService;
 
     /**
      * GoogleAuthenticator constructor.
@@ -44,13 +56,16 @@ class GoogleAuthentificator  extends SocialAuthenticator
      * @param EntityManagerInterface $manager
      * @param UserRepository $userRepository
      * @param RouterInterface $router
+     * @param ProfilesRepository $profilesRepository
      */
-    public function __construct(ClientRegistry $clientRegistry, EntityManagerInterface $manager, RouterInterface $router, UserRepository $userRepository)
+    public function __construct(ClientRegistry $clientRegistry, EntityManagerInterface $manager, RouterInterface $router, UserRepository $userRepository, ProfilesRepository $profilesRepository, IndividualDataService $dataService)
     {
         $this->clientRegistry = $clientRegistry;
         $this->manager = $manager;
         $this->router = $router;
-        $this->userRepository = $userRepository;        
+        $this->userRepository = $userRepository;   
+        $this->profilesRepository = $profilesRepository;
+        $this->dataService = $dataService;    
     }
 
     /**
@@ -88,10 +103,14 @@ class GoogleAuthentificator  extends SocialAuthenticator
             
             $user = new User();
             $user->setEmail($email);
-            $user->setFirstname($googleUser->getFirstname());
-            $user->setLastname($googleUser->getLastname());
+            // $user->setFirstname($googleUser->getFirstname());
+            // $user->setLastname($googleUser->getLastname());
             $user->setAccountConfirmation(true);
             $this->manager->persist($user);
+
+            $profile = $this->profilesRepository->findOneBy(['code' => 'individual']);
+            $this->dataService->CreateIndividual($user, $profile);
+
             $this->manager->flush();
         }
 

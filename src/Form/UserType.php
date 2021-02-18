@@ -30,8 +30,7 @@ class UserType extends AbstractType
             ->add('profiles', ChoiceType::class, [
                 'mapped' => false,
                 'choices' =>[
-                    'Locataire' => 'tenant',
-                    'Vendeur/Loueur' => 'seller'
+                    'Je suis un particulier' => 'individual',
                 ],
                 'attr' => ['class' => 'form-control'],
                 'label' => 'Votre profiles'

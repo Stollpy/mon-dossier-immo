@@ -17,7 +17,8 @@
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
               <li><a class="dropdown-item" href="{{ path('user.edit', {'id' : app.user.id}) }}">Mes information de connexion</a></li>
               {% if app.user.tokenAccount == null %}
-                <li><a class="dropdown-item" href="{{ path('user.information', {'id' : app.user.id}) }}">Mes information personelles</a></li>
+                <li><a class="dropdown-item" href="{{ path('user.information_tenant', {'id' : app.user.id}) }}">Mes information de locataire</a></li>
+                <li><a class="dropdown-item" href="{{ path('user.information_seller', {'id' : app.user.id}) }}">Mes information de vendeur</a></li>
               {% endif %}
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="{{ path("security.logout") }}">Déconnexion</a></li>

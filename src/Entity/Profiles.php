@@ -39,10 +39,21 @@ class Profiles
      */
     private $individuals;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Profiles::class, inversedBy="profiles")
+     */
+    private $parentProfile;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Profiles::class, mappedBy="parentProfile")
+     */
+    private $profiles;
+
     public function __construct()
     {
         $this->profileModelData = new ArrayCollection();
         $this->individuals = new ArrayCollection();
+        $this->profiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -120,6 +131,48 @@ class Profiles
     {
         if ($this->individuals->removeElement($individual)) {
             $individual->removeProfile($this);
+        }
+
+        return $this;
+    }
+
+    public function getParentProfile(): ?self
+    {
+        return $this->parentProfile;
+    }
+
+    public function setParentProfile(?self $parentProfile): self
+    {
+        $this->parentProfile = $parentProfile;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|self[]
+     */
+    public function getProfiles(): Collection
+    {
+        return $this->profiles;
+    }
+
+    public function addProfile(self $profile): self
+    {
+        if (!$this->profiles->contains($profile)) {
+            $this->profiles[] = $profile;
+            $profile->setParentProfile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProfile(self $profile): self
+    {
+        if ($this->profiles->removeElement($profile)) {
+            // set the owning side to null (unless already changed)
+            if ($profile->getParentProfile() === $this) {
+                $profile->setParentProfile(null);
+            }
         }
 
         return $this;

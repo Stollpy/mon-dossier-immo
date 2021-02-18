@@ -6,11 +6,55 @@
 <div class="container-fluid">
     <div class="container">
         <div class="row">
-            <div class="col-12">
-                {{ form_start(form) }}
-                {{ form_widget(form) }}
-                <input type="submit" class="btn btn-outline-primary mt-3" value="Modifier">
-                {{ form_end(form) }}
+            <div class="col-6 rounded shadow-sm">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Formulaire d'identité</h2>
+                    </div>
+                    <div class="col-12">
+                        {{ form_start(form) }}
+                        {{ form_widget(form) }}
+                        <input type="submit" class="btn btn-outline-primary mt-3" value="Modifier">
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <table class="table">
+                                <thead>
+                                    <tr>
+                                    <th scope="col">Vos informations personelles</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    {% for data in datas %}
+                                        <td>
+                                            {% if data.data is defined and data.data is not null %} 
+                                                Votre {{ data.profilModelData.label }}:  {{ data.data }}
+                                            {% else %}
+                                                Vous n'avez pas préciser votre {{ data.profilModelData.label }}
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 mr-2 rounded shadow-sm">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Documents d'identité</h2>
+                    </div>
+                    <div class="col-12">
+                    {{ form_start(formDoc) }}
+                    {{ form_widget(formDoc) }}
+                    <input type="submit" class="btn btn-outline-primary mt-3" value="Uploader">
+                    {{ form_end(formDoc) }}
+                    </div>
+                </div>
             </div>
         </div>
     </div>

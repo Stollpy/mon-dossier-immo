@@ -4,15 +4,13 @@ namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
 use App\Repository\ProfilModelDataRepository;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TelType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
-class IdentityType extends AbstractType
+class DocumentType extends AbstractType
 {
 
     public function __construct(ProfilModelDataRepository $profilModelDataRepository, Security $security){
@@ -23,14 +21,12 @@ class IdentityType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
         $types = [
-            "text" => TextType::class,
-            "date" => DateType::class,
-            "tel" => TelType::class,
+            "file" => FileType::class,
         ];
             
             $models = $this->profilModelData->getModelByProfilAndCategory($options['data_profile'], $options["data_category"]);
+            
             foreach($models as $model){
                 $code = $model->getCode();
                 $type = $model->getType();
@@ -61,14 +57,3 @@ class IdentityType extends AbstractType
         ]);
     }
 }
-
-// $labels = [];
-// foreach($models as $model){
-//     $labels = [
-//      $model->getLabel() => $model->getCode(),
-//     ]; // Ou 
-//          array_push($model->getLabel() => $model->getCode());
-// }
-//  ->add('profiles', ChoiceType::class, [
-//     'mapped' => false,
-//     'choices' => $labels
