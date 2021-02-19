@@ -13,7 +13,7 @@
                                     <a class="nav-link" aria-current="page" href="#">Mon identité</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="#">Mes documents</a>
+                                    <a class="nav-link" href="{{ path('user.document', { 'id': app.user.id }) }}">Mes documents</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="#">Mes garants</a>

@@ -93,4 +93,21 @@ class ProfilModelDataRepository extends ServiceEntityRepository
               ->getResult()
           ;
       }
+
+        /**
+      * @return ProfilModelData[] Returns an array of ProfilModelData objects
+      */
+    
+      public function getModelByProfile($profile)
+      {
+          return $this->createQueryBuilder('p')
+              ->innerJoin('p.profiles', 'profiles')
+              ->addSelect('profiles')
+              ->andWhere('profiles.code = :profile')
+  
+              ->setParameter('profile', $profile)
+              ->getQuery()
+              ->getResult()
+          ;
+      }
 }

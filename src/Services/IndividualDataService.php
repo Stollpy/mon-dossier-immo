@@ -78,10 +78,10 @@ class IndividualDataService {
 
     }
 
-    public function insertIndividualData($individual, $form)
+    public function insertIndividualData($individual, $form, $profile, $category)
     {
-        $models = $this->profileModelDataRepository->getModelByIndividual($individual);
-
+        $models = $this->profileModelDataRepository->getModelByProfilAndCategory($profile, $category);
+        
         foreach ($models as $model){
             $code = $model->getCode();
 

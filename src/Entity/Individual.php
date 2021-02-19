@@ -45,12 +45,18 @@ class Individual
      */
     private $profiles;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Document::class, mappedBy="individual", orphanRemoval=true)
+     */
+    private $documents;
+
     public function __construct()
     {
         $this->individualData = new ArrayCollection();
         $this->garant = new ArrayCollection();
         $this->individuals = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->documents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -171,6 +177,36 @@ class Individual
     public function removeProfile(profiles $profile): self
     {
         $this->profiles->removeElement($profile);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Document[]
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(Document $document): self
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents[] = $document;
+            $document->setIndividual($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(Document $document): self
+    {
+        if ($this->documents->removeElement($document)) {
+            // set the owning side to null (unless already changed)
+            if ($document->getIndividual() === $this) {
+                $document->setIndividual(null);
+            }
+        }
 
         return $this;
     }

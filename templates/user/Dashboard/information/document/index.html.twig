@@ -1,0 +1,32 @@
+{% extends "user/Dashboard/information/base.html.twig"%}
+
+{% block title %}Dashboard - Mes documents{% endblock %}
+
+{% block functionality %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <table class="table">
+                    <thead>
+                        <tr>
+                        <th scope="col">Titre de votre document uploader</th>
+                        <th scope="col">Télécharger</th>
+                        <th scope="col">Supprimer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in documents %} 
+                            <tr>
+                                <th scope="row">{{ document.label }}</th>
+                                <td><a href="#" class="btn btn-outline-primary"><i class="fas fa-download"></i></a></td>
+                                <td><a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -34,9 +34,15 @@ class IndividualDataCategory
      */
     private $ProfilModelData;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Document::class, mappedBy="category")
+     */
+    private $documents;
+
     public function __construct()
     {
         $this->ProfilModelData = new ArrayCollection();
+        $this->documents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -92,6 +98,36 @@ class IndividualDataCategory
             // set the owning side to null (unless already changed)
             if ($profilModelData->getIndividualDataCategory() === $this) {
                 $profilModelData->setIndividualDataCategory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Document[]
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(Document $document): self
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents[] = $document;
+            $document->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(Document $document): self
+    {
+        if ($this->documents->removeElement($document)) {
+            // set the owning side to null (unless already changed)
+            if ($document->getCategory() === $this) {
+                $document->setCategory(null);
             }
         }
 

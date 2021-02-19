@@ -61,14 +61,3 @@ class IdentityType extends AbstractType
         ]);
     }
 }
-
-// $labels = [];
-// foreach($models as $model){
-//     $labels = [
-//      $model->getLabel() => $model->getCode(),
-//     ]; // Ou 
-//          array_push($model->getLabel() => $model->getCode());
-// }
-//  ->add('profiles', ChoiceType::class, [
-//     'mapped' => false,
-//     'choices' => $labels

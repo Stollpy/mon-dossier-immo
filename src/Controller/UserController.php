@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use App\Entity\Document;
 use App\Entity\Individual;
 use App\Form\DocumentType;
 use App\Form\EditUserType;
@@ -15,6 +16,8 @@ use App\Form\EditUserPasswordType;
 use App\Form\PasswordRecoveryType;
 use App\Repository\UserRepository;
 use App\Form\PasswordResettingType;
+use App\Services\UploadFilesHelper;
+use App\Repository\DocumentRepository;
 use App\Repository\ProfilesRepository;
 use App\Services\IndividualDataService;
 use App\Security\LoginFormAuthenficator;
@@ -26,7 +29,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\File;
+use App\Repository\IndividualDataCategoryRepository;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -357,7 +364,7 @@ class UserController extends AbstractController
           if($form->isSubmitted() && $form->isValid()){
 
             $individual = $user->getIndividual();
-            $individualDataService->insertIndividualData($individual, $form);
+            $individualDataService->insertIndividualData($individual, $form, 'tenant', 'identity');
 
             $id = $user->getId();
             $this->addFlash('success', 'Vos données ont bien été modifié');
@@ -365,7 +372,7 @@ class UserController extends AbstractController
 
           }
 
-          $formDoc = $this->createForm(DocumentType::class, null, ['data_profile' => 'seller', 'data_category' => 'document', 'action' => $this->generateUrl('user.uploadDoc', ['id' => $user->getId()])]);
+          $formDoc = $this->createForm(DocumentType::class, null, ['action' => $this->generateUrl('user.uploadDoc', ['id' => $user->getId()]), 'method' => 'POST']);
 
           return $this->render('user/Dashboard/information/identity/index.html.twig', [
             'form' => $form->createView(),
@@ -393,7 +400,7 @@ class UserController extends AbstractController
           if($form->isSubmitted() && $form->isValid()){
 
             $individual = $user->getIndividual();
-            $individualDataService->insertIndividualData($individual, $form);
+            $individualDataService->insertIndividualData($individual, $form, 'seller', 'identity');
 
             $id = $user->getId();
             $this->addFlash('success', 'Vos données ont bien été modifié');
@@ -401,7 +408,7 @@ class UserController extends AbstractController
 
           }
 
-          $formDoc = $this->createForm(DocumentType::class, null, ['data_profile' => 'seller', 'data_category' => 'document', 'action' => $this->generateUrl('user.uploadDoc', ['id' => $user->getId()]), 'method' => 'POST']);
+          $formDoc = $this->createForm(DocumentType::class, null, ['action' => $this->generateUrl('user.uploadDoc', ['id' => $user->getId()]), 'method' => 'POST']);
 
           return $this->render('user/Dashboard/information/identity/index.html.twig', [
             'form' => $form->createView(),
@@ -411,11 +418,73 @@ class UserController extends AbstractController
       }
 
       /**
-       * @Route("user/mes-information-vendeur/upload/{id}", name="user.uploadDoc")
+       * @Route("user/mes-information-vendeur/upload/{id}", name="user.uploadDoc", methods={"POST"})
+       * @param Request $request
+       * @param UploadFilesHelper $uploadFilesHelper
+       * @param User $user
+       * @param IndividualDataCategoryRepository $categroyRepository
+       * @param ValidatorInterface $validator
        */
-      public function UplodadDocument()
+      public function UplodadDocument(Request $request, User $user, UploadFilesHelper $uploadFilesHelper, IndividualDataCategoryRepository $categoryRepository, ValidatorInterface $validator)
       {
-          dd($_POST);
+
+        $individual = $user->getIndividual();
+
+        // Récupération du document
+        $req = $request->files->get('document');
+        $file = $req['data'];
+
+        // Récupération du titre du document
+        $req = $request->get('document');
+        $label = $req['label'];
+
+        $category = $categoryRepository->findOneBy(['code' => 'identity']);
+
+        $violations = $validator->validate($file, [new File([
+            'maxSize' => '10000k', 
+            'maxSizeMessage' => 'Le fichier est trop volumineux. Maximun autorisé : 1ko',
+            'mimeTypes' => [
+                'image/*',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'text/plain'
+            ],
+            'mimeTypesMessage' => 'Type de fichier invalide']),
+            New NotBlank(['message' => 'Merci de séléctionner un fichier.'])
+        ]);
+
+        $id = $user->getId();
+
+        if($violations->count() > 0){
+            $violations = $violations[0];
+            $this->addFlash('error', $violations->getMessage());
+            return $this->redirectToRoute('user.information_seller', ['id' => $id]);
+        }
+        
+        $uploadFilesHelper->uploadFilePrivate($file, $label, $individual, $category);
+
+        $this->addFlash('success', 'Votre documents à bien été téléchargé ! Vous pouvez le retouver dans votre rubrique "Mes documents".');
+        return $this->redirectToRoute('user.information_seller', ['id' => $id]);
+
       }
 
+      /**
+       * @Route("/user/mes-documents/{id}", name="user.document")
+       * @param User $user
+       * @param DocumentRepository $documentRepository
+       */
+      public function EditDocument(User $user, DocumentRepository $documentRepository)
+      {
+            $individual = $user->getIndividual();
+
+            $documents = $documentRepository->findBy(["individual" => $individual]);
+
+            return $this->render('user/Dashboard/information/document/index.html.twig', [
+                'documents' => $documents,
+            ]);
+      }
 }
