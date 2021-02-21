@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use GuzzleHttp\Client;
 use App\Entity\Document;
 use App\Entity\Individual;
 use App\Form\DocumentType;
@@ -29,10 +30,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\Validator\Constraints\File;
 use App\Repository\IndividualDataCategoryRepository;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,6 +45,10 @@ use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 
 class UserController extends AbstractController
 {
+    private $manager;
+    private $mailer;
+    private $userRepository;
+    private $token;
 
     public function __construct(EntityManagerInterface $manager, MailerInterface $mailer, 
         UserRepository $userRepository, TokenGeneratorInterface $token)
@@ -259,7 +266,7 @@ class UserController extends AbstractController
     }
   
     /**
-     * @Route("/user/dashboard/edit/{id<\d+>}", name="user.edit")
+     * @Route("/user/dashboard/{id}/edit", name="user.edit")
      * @param User $user
      * @param Request $request
      */
@@ -290,7 +297,7 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("user/dashboard/edit-password/{id<\d+>}", name="user.edit-password")
+     * @Route("user/dashboard/{id}/edit-password", name="user.edit-password")
      * @param User $user
      * @param Request $request
      * @param UserEncoderInterface $encoder
@@ -327,7 +334,7 @@ class UserController extends AbstractController
      }
 
      /**
-     * @Route("user/dashboard/remove/{id<\d+>}", name="user.remove")
+     * @Route("user/dashboard/{id}/remove", name="user.remove")
      * @param User $user
      */
 
@@ -418,7 +425,7 @@ class UserController extends AbstractController
       }
 
       /**
-       * @Route("user/mes-information-vendeur/upload/{id}", name="user.uploadDoc", methods={"POST"})
+       * @Route("user/mes-informations/{id}/upload", name="user.uploadDoc", methods={"POST"})
        * @param Request $request
        * @param UploadFilesHelper $uploadFilesHelper
        * @param User $user
@@ -468,7 +475,7 @@ class UserController extends AbstractController
         $uploadFilesHelper->uploadFilePrivate($file, $label, $individual, $category);
 
         $this->addFlash('success', 'Votre documents à bien été téléchargé ! Vous pouvez le retouver dans votre rubrique "Mes documents".');
-        return $this->redirectToRoute('user.information_seller', ['id' => $id]);
+        return $this->redirectToRoute('user.document', ['id' => $id]);
 
       }
 
@@ -483,8 +490,91 @@ class UserController extends AbstractController
 
             $documents = $documentRepository->findBy(["individual" => $individual]);
 
+
+            $client = new Client();
+            $client->store();
+
+            
+
             return $this->render('user/Dashboard/information/document/index.html.twig', [
                 'documents' => $documents,
             ]);
       }
+
+      /**
+       * @Route("user/mes-documents/{id}/display/", name="user.document_display")
+       * @param Document $document
+       * @param UploadFilesHelper $upload
+       */
+      public function DisplayDocument(Document $document, UploadFilesHelper $upload)
+      {
+        if($document->getindividual()->getUser() !== $this->getUser()){
+            $this->addFlash('error', 'vous n\'êtes pas autorisé à consulter se document !');
+            return $this->redirectToRoute('home.index');
+        }
+
+        $response = new StreamedResponse(function() use ($document, $upload){
+            $outputStream = fopen('php://output', 'wb');
+            $fileStream = $upload->readStream($document->getFilePath(), false);
+            stream_copy_to_stream($fileStream, $outputStream);
+        });
+
+        $response->headers->set('Content-Type', $document->getMimeType());
+
+        return $response;
+      }
+
+       /**
+       * @Route("user/mes-documents/{id}/download/", name="user.document_download")
+       * @param Document $document
+       * @param UploadFilesHelper $upload
+       */
+      public function DownloadDocument(Document $document, UploadFilesHelper $upload)
+      {
+        if($document->getindividual()->getUser() !== $this->getUser()){
+            $this->addFlash('error', 'vous n\'êtes pas autorisé à consulter se document !');
+            return $this->redirectToRoute('home.index');
+        }
+
+        $response = new StreamedResponse(function() use ($document, $upload){
+            $outputStream = fopen('php://output', 'wb');
+            $fileStream = $upload->readStream($document->getFilePath(), false);
+            stream_copy_to_stream($fileStream, $outputStream);
+        });
+
+        $disposition = HeaderUtils::makeDisposition(
+            HeaderUtils::DISPOSITION_ATTACHMENT,
+            $document->getData()
+        );
+
+        $response->headers->set('Content-Disposition', $disposition);
+
+        return $response;
+      }
+
+
+      /**
+       * @Route("user/mes-documents/{id}/delete", name="user.document_delete")
+       * @param Document $document
+       * @param UploadFilesHelper $upload
+       */
+      public function DeleteDocument(Document $document, UploadFilesHelper $upload)
+      {
+            $this->manager->remove($document);
+            $upload->deleteFile($document->getFilePath(), false);
+            $this->manager->flush();
+
+            $this->addFlash('success', 'Votre document à bien été supprimé.');
+            return $this->redirectToRoute('user.document', ['id' => $this->getUser()->getId()]);
+      }
+
+    /**
+     * @Route("user/mes-documents/{id}/check/display", name="user.document_check_dipslay")
+     * @param Document $document
+     */
+
+    public function createDocumentPdf(Document $document)
+    {
+        
+    }
 }

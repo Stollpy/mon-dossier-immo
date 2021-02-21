@@ -7,24 +7,48 @@
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <table class="table">
-                    <thead>
-                        <tr>
-                        <th scope="col">Titre de votre document uploader</th>
-                        <th scope="col">Télécharger</th>
-                        <th scope="col">Supprimer</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for document in documents %} 
-                            <tr>
-                                <th scope="row">{{ document.label }}</th>
-                                <td><a href="#" class="btn btn-outline-primary"><i class="fas fa-download"></i></a></td>
-                                <td><a href="#" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a></td>
+                {% if documents is not null %}
+                    <table class="table">
+                        <thead>
+                            <tr class="text-center">
+                                <th scope="col"> Ajouter</th>
+                                <th scope="col">Titre de votre document uploader</th>
+                                <th scope="col">Télécharger</th>
+                                <th scope="col">Voir le document</th>
+                                <th scope="col">Supprimer</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for document in documents %} 
+                                <tr class="text-center">
+                                    <td> 
+                                        <span class="form-check d-flex justify-content-center">
+                                            <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" checked>
+                                        </span>
+                                    </td>
+                                    <th scope="row">{{ document.label }}</th>
+                                    <td>
+                                        <a href="{{ path('user.document_download', {'id': document.id}) }}" class="btn btn-outline-primary">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('user.document_display', {'id' : document.id}) }}" class="btn btn-outline-primary">
+                                            <i class="far fa-eye"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('user.document_delete', {'id' : document.id}) }}" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <h2 class="mt-3">Vous n'avez aucun document</h2>
+                {% endif %}
             </div>
         </div>
     </div>

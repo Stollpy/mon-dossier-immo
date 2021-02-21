@@ -2,8 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\DocumentRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Services\UploadFilesHelper;
+use App\Repository\DocumentRepository;
 
 /**
  * @ORM\Entity(repositoryClass=DocumentRepository::class)
@@ -37,6 +38,11 @@ class Document
      * @ORM\Column(type="string", length=255)
      */
     private $label;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $mime_type;
 
     public function getId(): ?int
     {
@@ -90,4 +96,22 @@ class Document
 
         return $this;
     }
+
+    public function getMimeType(): ?string
+    {
+        return $this->mime_type;
+    }
+
+    public function setMimeType(string $mime_type): self
+    {
+        $this->mime_type = $mime_type;
+
+        return $this;
+    }
+
+    public function getFilePath(): string
+    {
+    return UploadFilesHelper::UPLOAD_REFERENCE. '/' . $this->data;
+    }
+
 }

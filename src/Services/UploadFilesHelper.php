@@ -27,7 +27,7 @@ class UploadFilesHelper{
 
     public function uploadFilePublic($file, $individual, $label, $category)
     {
-        $fileName = $this->uploadFileGeneric($file, self::UPLOAD_REFERENCE, false);
+        $fileName = $this->uploadFileGeneric($file, self::UPLOAD_REFERENCE);
 
         $document = new Document();
         $document->setData($fileName);
@@ -45,6 +45,7 @@ class UploadFilesHelper{
 
         $document = new Document();
         $document->setData($fileName);
+        $document->setMimeType($file->guessExtension());
         $document->setLabel($label);
         $document->setIndividual($individual);
         $document->setCategory($category);
@@ -79,4 +80,38 @@ class UploadFilesHelper{
 
         return $newFilename;
     }
+
+    /**
+     * readStream function
+     *
+     * @param string $path
+     * @param boolean $isPublic
+     * @return resource
+     */
+    public function readStream(string $path, bool $isPublic)
+    {
+        $filesystem = $isPublic ? $this->publicFileSystem : $this->privateFilesystem;
+
+        $resource = $filesystem->readStream($path);
+        if($resource === false){
+            throw new \Exception(sprintf('Error opening stream for "%s"', $path));
+        }
+
+        return $resource;
+    }
+
+    /**
+     * deleteFile Function
+     *
+     * @param string $path
+     * @param boolean $isPublic
+     */
+    public function deleteFile(string $path, bool $isPublic)
+    {
+        $filesystem = $isPublic ? $this->publicFileSystem : $this->privateFilesystem;
+        $result = $filesystem->delete($path);
+        if($result === false){
+            throw new \Exception(sprintf('Error deleting "%s"', $path));
+        }
+    }   
 }
