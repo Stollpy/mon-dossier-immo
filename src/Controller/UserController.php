@@ -611,11 +611,16 @@ class UserController extends AbstractController
        */
       public function checkDirectoryTenant($invitation, SessionInterface $session, Request $request, InvitationRepository $invitationRepository)
       {
+            $invit = $invitationRepository->findOneBy(['id' => $invitation]);
+
+            if(!empty($session->get($invit->getIndividual()->getId()))){
+                $session->remove($invit->getIndividual()->getId());
+            }
+            
             $codeBrut = mt_rand(1000, 9999);
             $code = $session->get('ValidCode', []);
             $session->set('ValidCode',[number_format($codeBrut, 0,'', '')]);
             
-            $invit = $invitationRepository->findOneBy(['id' => $invitation]);
             $email = $invit->getEmail();
 
             $mail = (new TemplatedEmail())
@@ -640,7 +645,6 @@ class UserController extends AbstractController
                 if($data == $code[0]){
                     // dd('yes');
                     $session->remove('ValidCode');
-                    $session->remove('directoryAccess');
 
                     $individual = $invit->getIndividual();
 
@@ -651,7 +655,7 @@ class UserController extends AbstractController
                     $session->set($individual->getId(), [$directoryAccess]);
                     return $this->redirectToRoute('user.directory_tenant', ['id' => $individual->getId(), 'token' => $token]);
                 }else{
-                    // dd('ah', $code);
+                    // dd('no', $code);
                     $this->addFlash('error', 'mauvais code');
                     return $this->redirectToRoute('user.directory_tenant_check', ['invitation' => $invitation]);
                 }

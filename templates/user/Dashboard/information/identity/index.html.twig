@@ -55,6 +55,7 @@
                     {{ form_end(formDoc) }}
                     </div>
                 </div>
+               {% if formInvitation is defined %}
                 <div class="row">
                     <div class="col-6">
                         <!-- Declenchement de modal invitation -->
@@ -64,11 +65,13 @@
                     </div>
                     <div class="col-6"></div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
-      <!-- Modal invitation -->
+{% if formInvitation is defined %}
+    <!-- Modal invitation -->
             <div class="modal fade" id="invitationModal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
                  <div class="modal-dialog">
                      <div class="modal-content">
@@ -88,4 +91,5 @@
                     </div>
                 </div>
             </div>
+{% endif %}
 {% endblock %}
