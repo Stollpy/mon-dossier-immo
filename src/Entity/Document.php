@@ -44,6 +44,11 @@ class Document
      */
     private $mime_type;
 
+    /**
+     * @ORM\OneToOne(targetEntity=DocumentEmail::class, mappedBy="document", cascade={"persist", "remove"})
+     */
+    private $documentEmail;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -112,6 +117,28 @@ class Document
     public function getFilePath(): string
     {
     return UploadFilesHelper::UPLOAD_REFERENCE. '/' . $this->data;
+    }
+
+    public function getDocumentEmail(): ?DocumentEmail
+    {
+        return $this->documentEmail;
+    }
+
+    public function setDocumentEmail(?DocumentEmail $documentEmail): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($documentEmail === null && $this->documentEmail !== null) {
+            $this->documentEmail->setDocument(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($documentEmail !== null && $documentEmail->getDocument() !== $this) {
+            $documentEmail->setDocument($this);
+        }
+
+        $this->documentEmail = $documentEmail;
+
+        return $this;
     }
 
 }

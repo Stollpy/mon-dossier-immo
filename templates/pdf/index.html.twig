@@ -1,0 +1,16 @@
+{% block body %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <p>Le client TOTO vous à transmit son dossier</p>
+            </div>
+            {% for document in documents %}
+                <div class="col-12">
+                    {{ document.label }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

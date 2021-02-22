@@ -3,14 +3,17 @@
 namespace App\Controller;
 
 
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use App\Entity\User;
 use App\Form\UserType;
-use GuzzleHttp\Client;
 use App\Entity\Document;
 use App\Entity\Individual;
 use App\Form\DocumentType;
 use App\Form\EditUserType;
 use App\Form\IdentityType;
+use App\Form\PdfCreateType;
+use App\Entity\DocumentEmail;
 use App\Entity\IndividualData;
 use App\Entity\ProfilModelData;
 use App\Form\EditUserPasswordType;
@@ -483,21 +486,79 @@ class UserController extends AbstractController
        * @Route("/user/mes-documents/{id}", name="user.document")
        * @param User $user
        * @param DocumentRepository $documentRepository
+       * @param Request $request
+       * @param IndividualDataCategoryRepository $categoryRepository
+       * @param ValidatorInterface $validator
+       * @param UploadFileHelper $uploadFileHelper
        */
-      public function EditDocument(User $user, DocumentRepository $documentRepository)
+      public function Document(User $user, DocumentRepository $documentRepository, Request $request, IndividualDataCategoryRepository $categoryRepository, ValidatorInterface $validator, UploadFilesHelper $uploadFilesHelper)
       {
             $individual = $user->getIndividual();
 
             $documents = $documentRepository->findBy(["individual" => $individual]);
 
-
-            $client = new Client();
-            $client->store();
-
+            $form = $this->createForm(PdfCreateType::class);
+            $form->handleRequest($request);      
             
+            if($form->isSubmitted() && $form->isValid()){
+
+                $category = $categoryRepository->findOneBy(['code' => 'identity']);
+
+                $options = new Options();
+                $options->set('isRemoteEnabled', true);
+
+                $dompdf = new Dompdf();
+                $html = $this->renderView('pdf/index.html.twig', ['documents' => $documents, 'user' => $user]);
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $output = $dompdf->output();
+
+                $stream = fopen($output, 'r');
+                dd($stream);
+
+                $privateDirectory = $this->getParameter('kernel.root_dir') . '/var/upload/Dossier-locataire';
+                $pdfFilepath = $privateDirectory.'/'.$form->get('label')->getData().'.pdf';
+
+                file_put_contents($pdfFilepath, $output);
+
+                $document = new Document();
+                $document->setData($form->get('label')->getData());
+                $document->setMimeType('pdf');
+                $document->setLabel($form->get('label')->getData());
+                $document->setIndividual($individual);
+                $document->setCategory($category);
+                $this->manager->persist($document);
+        
+                $EmailDocument = new DocumentEmail();
+                $EmailDocument->setEmail($form->get('email')->getData());
+                $EmailDocument->setDocument($document);
+        
+                $this->manager->flush();
+
+
+                    $email = (new TemplatedEmail())
+                    ->from('mon-dossier-immo@support.com')
+                    ->to($form->get('email')->getData())
+                    ->replyTo('mon-dossier-immo@support.com')
+                    ->subject($form->get('label')->getData())
+                    ->context([
+                        'user' => $user,
+                        'file' => $document
+                    ])
+                    ->htmlTemplate('pdf/email/index.html.twig');
+    
+                $this->mailer->send($email);
+
+                $this->addFlash('success', 'Votre documents dossier à bien été générer et envoyer au propriétaire ! Vous pouvez le retouver dans votre rubrique "Mes documents".');
+                return $this->redirectToRoute('user.document', ['id' => $user->getId()]);
+
+            }
+
 
             return $this->render('user/Dashboard/information/document/index.html.twig', [
                 'documents' => $documents,
+                'form' => $form->createView()
             ]);
       }
 
@@ -573,8 +634,8 @@ class UserController extends AbstractController
      * @param Document $document
      */
 
-    public function createDocumentPdf(Document $document)
+    public function checkDisplay(Document $document)
     {
-        
+        dd('Sa fonctionne');
     }
 }
