@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Entity\Document;
 use App\Entity\Individual;
 use App\Entity\IndividualDataCategory;
+use App\Entity\Profiles;
 use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -39,7 +40,7 @@ class UploadFilesHelper{
         $this->manager->flush();
     }
 
-    public function uploadFilePrivate($file, string $label, Individual $individual, IndividualDataCategory $category)
+    public function uploadFilePrivate($file, string $label, Individual $individual, IndividualDataCategory $category, Profiles $profile = null)
     {
         $fileName = $this->uploadFileGeneric($file, self::UPLOAD_REFERENCE, false);
 
@@ -49,6 +50,7 @@ class UploadFilesHelper{
         $document->setLabel($label);
         $document->setIndividual($individual);
         $document->setCategory($category);
+        $document->setProfile($profile);
 
         $this->manager->persist($document);
         $this->manager->flush();

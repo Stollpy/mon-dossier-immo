@@ -55,8 +55,37 @@
                     {{ form_end(formDoc) }}
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-6">
+                        <!-- Declenchement de modal invitation -->
+                        <button class="btn btn-outline-primary mt-5" data-bs-toggle="modal" data-bs-target="#invitationModal">
+                            Créer une invitation<i class="fas fa-plus-circle"></i>
+                        </button>
+                    </div>
+                    <div class="col-6"></div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+      <!-- Modal invitation -->
+            <div class="modal fade" id="invitationModal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
+                 <div class="modal-dialog">
+                     <div class="modal-content">
+                         <div class="modal-header">
+                             <h5 class="modal-title" id="delete-modal-label">Créer une invitation</h5>
+                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                         </div>
+                         <div class="modal-body">
+                            {{ form_start(formInvitation) }}
+                            {{ form_widget(formInvitation) }}
+                         </div>
+                        <div class="modal-footer">
+                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-outline-primary">Créer une invitation</button>
+                        </div>
+                        {{ form_end(formInvitation) }}
+                    </div>
+                </div>
+            </div>
 {% endblock %}

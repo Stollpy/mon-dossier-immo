@@ -50,6 +50,11 @@ class Individual
      */
     private $documents;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Invitation::class, mappedBy="individual")
+     */
+    private $invitations;
+
     public function __construct()
     {
         $this->individualData = new ArrayCollection();
@@ -57,6 +62,7 @@ class Individual
         $this->individuals = new ArrayCollection();
         $this->profiles = new ArrayCollection();
         $this->documents = new ArrayCollection();
+        $this->invitations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -205,6 +211,36 @@ class Individual
             // set the owning side to null (unless already changed)
             if ($document->getIndividual() === $this) {
                 $document->setIndividual(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Invitation[]
+     */
+    public function getInvitations(): Collection
+    {
+        return $this->invitations;
+    }
+
+    public function addInvitation(Invitation $invitation): self
+    {
+        if (!$this->invitations->contains($invitation)) {
+            $this->invitations[] = $invitation;
+            $invitation->setIndividual($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitation(Invitation $invitation): self
+    {
+        if ($this->invitations->removeElement($invitation)) {
+            // set the owning side to null (unless already changed)
+            if ($invitation->getIndividual() === $this) {
+                $invitation->setIndividual(null);
             }
         }
 

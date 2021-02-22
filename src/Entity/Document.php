@@ -44,6 +44,11 @@ class Document
      */
     private $mime_type;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Profiles::class, inversedBy="documents")
+     */
+    private $profile;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -112,6 +117,18 @@ class Document
     public function getFilePath(): string
     {
     return UploadFilesHelper::UPLOAD_REFERENCE. '/' . $this->data;
+    }
+
+    public function getProfile(): ?Profiles
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?Profiles $profile): self
+    {
+        $this->profile = $profile;
+
+        return $this;
     }
 
 }

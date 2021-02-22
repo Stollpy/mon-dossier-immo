@@ -49,11 +49,17 @@ class Profiles
      */
     private $profiles;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Document::class, mappedBy="profile")
+     */
+    private $documents;
+
     public function __construct()
     {
         $this->profileModelData = new ArrayCollection();
         $this->individuals = new ArrayCollection();
         $this->profiles = new ArrayCollection();
+        $this->documents = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -172,6 +178,36 @@ class Profiles
             // set the owning side to null (unless already changed)
             if ($profile->getParentProfile() === $this) {
                 $profile->setParentProfile(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Document[]
+     */
+    public function getDocuments(): Collection
+    {
+        return $this->documents;
+    }
+
+    public function addDocument(Document $document): self
+    {
+        if (!$this->documents->contains($document)) {
+            $this->documents[] = $document;
+            $document->setProfile($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocument(Document $document): self
+    {
+        if ($this->documents->removeElement($document)) {
+            // set the owning side to null (unless already changed)
+            if ($document->getProfile() === $this) {
+                $document->setProfile(null);
             }
         }
 
