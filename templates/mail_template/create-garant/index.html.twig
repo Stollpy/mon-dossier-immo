@@ -630,23 +630,23 @@
 
                                                 <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
 
-                                                    <h1>Vous avez reçu un dossier de location pour le bien {{ ref }}</h1>
+                                                    <h1>Vous avez reçu une demande de garant</h1>
 
-                                                    <p>Voici un lien pour accéder au dossier du demandeur de votre bien !</p>
+                                                    <p>Un utilisateur de mon-dossier-immo vous demande comme garant</p>
 
                                                     <table>
                                                         <tbody>
                                                         <tr>
                                                             <td>
                                                                 <h2>
-                                                                    Le lien pour voir le dossier :
+                                                                    <a href="{{absolute_url(path('user.tenant_garant-summarize', {'id': user.id}))}}">Demande de garant</a>
                                                                 </h2>
                                                             </td>
                                                         </tr>
                                                         <tr>
                                                             <td>
                                                                 <p>
-                                                                    <a href="{{absolute_url(path('user.directory_tenant_check_email', {'invitation' : invitation}))}}">Dossier de locateur</a>
+                                                                    
                                                                 </p>
                                                             </td>
                                                         </tr>

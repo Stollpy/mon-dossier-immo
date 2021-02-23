@@ -15,6 +15,7 @@ use App\Form\IdentityType;
 use PhpParser\Comment\Doc;
 use App\Form\InvitationType;
 use App\Entity\IndividualData;
+use App\Form\CreateGarantType;
 use App\Entity\ProfilModelData;
 use App\Form\CheckDirectoryType;
 use App\Form\EditUserPasswordType;
@@ -25,9 +26,11 @@ use App\Services\UploadFilesHelper;
 use App\Repository\DocumentRepository;
 use App\Repository\ProfilesRepository;
 use App\Services\IndividualDataService;
+use App\Repository\IndividualRepository;
 use App\Repository\InvitationRepository;
 use App\Security\LoginFormAuthenficator;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\UriSigner;
 use App\Repository\IndividualDataRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use App\Repository\ProfilModelDataRepository;
@@ -387,23 +390,117 @@ class UserController extends AbstractController
           }
 
           $formDoc = $this->createForm(DocumentType::class, null, ['action' => $this->generateUrl('user.tenant_upload_doc', ['id' => $user->getId()]), 'method' => 'POST']);
-
           $formInvitation = $this->createForm(InvitationType::class, null, ['action' => $this->generateUrl('user.tenant_invitation', ['id' => $user->getId()]), 'method' => 'POST']);
+          $formGarant = $this->createForm(CreateGarantType::class, null, ['action' => $this->generateUrl('user.tenant_garant', ['id' => $user->getId()]), 'method' => 'POST']);
+
 
           return $this->render('user/Dashboard/information/identity/index.html.twig', [
             'form' => $form->createView(),
             'datas' => $datas,
             'formDoc' => $formDoc->createView(),
             'formInvitation' => $formInvitation->createView(),
+            'formGarant' => $formGarant->createView(),
           ]);
       }
 
-      /**
-       * @Route("user/mes-informations-locataire/{id}/create-invitation", name="user.tenant_invitation")
-       * @param Request $request
-       */
-      public function createInvitation(Request $request)
-      {
+    /**
+    * @Route("user/mes-informations-locataire/{id}/create-garant", name="user.tenant_garant", methods={"POST"})
+    * @param Request $request
+    * @param int $id
+    */
+    public function createGarant($id, Request $request)
+    {
+        $data = $request->get('create_garant');
+
+        $email = (new TemplatedEmail())
+        ->from('mon-dossier-immo@support.com')
+        ->to($data['email'])
+        ->replyTo('mon-dossier-immo@support.com')
+        ->subject('Vous avez reçu une demande de garant')
+        ->context([
+             'user' => $this->getUser()
+            ])
+        ->htmlTemplate('mail_template/create-garant/index.html.twig')
+        ;
+
+        $this->mailer->send($email);
+
+        $this->addFlash('success', 'Votre demande de garant à bien été envoyé à l\'email précisé !');
+        return $this->redirectToRoute('user.information_tenant', ['id' => $id]);
+            
+    }
+
+    /**
+    * @Route("user/mes-informations-locataire/{id}/active-garant", name="user.tenant_garant-summarize", methods={"GET"})
+    * @param Request $request
+    * @param int $id
+    * @param SessionInterface $session
+    * @param UriSigner $signer
+    */
+    public function SummarizeGarant($id, SessionInterface $session, Request $request, UriSigner $signer)
+    {
+        $signer->checkRequest($request);
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $session->remove($id);
+        $session->get($id, []);
+        $token = $this->token->generateToken();  
+        $session->set($id, $token);  
+        // dd($session->get($id));    
+        
+        return $this->render('user/Garant/sumarize.html.twig', [
+            'id' => $id,
+            'token' => $token
+        ]);  
+    }
+
+    /**
+    * @Route("user/mes-informations-locataire/{id}/active-garant/{token}", name="user.tenant_garant-activate")
+    * @param string $token
+    * @param int $id
+    * @param SessionInterface $session
+    * @param Security $security
+    * @param IndividualRepository $individualRepository
+    */
+    public function activeGarant($id, $token, SessionInterface $session, Security $security, IndividualRepository $individualRepository)
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        // dd($session->get($id));
+        if($session->get($id) !== $token){
+            $this->addFlash('error', 'une erreur c\'est produite.');
+            return $this->redirectToRoute('home.index');
+        }
+
+        $user = $security->getUser();
+        $garant = $individualRepository->findOneByUser($user);
+        
+        $user = $this->userRepository->findOneBy(['id' => $id]);
+        $individual = $user->getIndividual();
+
+        $verif = [];
+        foreach ($individual->getIndividuals() as $individu){
+            array_push($verif, $individu->getId());
+        }
+
+        if(in_array($garant->getId(), $verif)){
+            $this->addFlash('error', 'Vous êtes déjà garants de cette personne.');
+            return $this->redirectToRoute('home.index');
+        }
+
+        $individual->addIndividual($garant);
+        $this->manager->persist($individual);
+        $this->manager->flush();
+
+        $this->addFlash('success', 'Vous êtes maintenant garant !');
+        return $this->redirectToRoute('home.index');
+  
+    }
+
+    /**
+    * @Route("user/mes-informations-locataire/{id}/create-invitation", name="user.tenant_invitation", methods={"POST"})
+    * @param Request $request
+    */
+    public function createInvitation(Request $request)
+    {
         $req = $request->get('invitation');
         $email = $req['email'];
 
@@ -422,7 +519,7 @@ class UserController extends AbstractController
         ->from('mon-dossier-immo@support.com')
         ->to($email)
         ->replyTo('mon-dossier-immo@support.com')
-        ->subject('Dossier de location pour le bien'.$ref)
+        ->subject('Dossier de location pour le bien '.$ref)
         ->context([
              'ref' => $ref,
              'invitation' => $invitation->getId(),
@@ -434,7 +531,7 @@ class UserController extends AbstractController
 
         $this->addFlash('success', 'Votre invitation de dossier à bien été envoyé');
         return $this->redirectToRoute('user.information_tenant', ['id' => $this->getUser()->getId()]);
-      }
+    }
 
      /**
       * @Route("user/mes-informations-vendeur/{id}", name="user.information_seller")
@@ -604,12 +701,12 @@ class UserController extends AbstractController
       }
 
       /**
-       * @Route("user/dossier-locataire/{invitation}/check", name="user.directory_tenant_check")
+       * @Route("user/dossier-locataire/{invitation}/check", name="user.directory_tenant_check_email", methods={"GET"})
+       * @param int $invitation
        * @param SessionInterface $session
-       * @param Request $request
        * @param InvitationRepository $invitationRepository
        */
-      public function checkDirectoryTenant($invitation, SessionInterface $session, Request $request, InvitationRepository $invitationRepository)
+      public function checkEmailDirectoryTenant($invitation, SessionInterface $session, InvitationRepository $invitationRepository)
       {
             $invit = $invitationRepository->findOneBy(['id' => $invitation]);
 
@@ -618,7 +715,7 @@ class UserController extends AbstractController
             }
             
             $codeBrut = mt_rand(1000, 9999);
-            $code = $session->get('ValidCode', []);
+            $session->get('ValidCode', []);
             $session->set('ValidCode',[number_format($codeBrut, 0,'', '')]);
             
             $email = $invit->getEmail();
@@ -635,35 +732,44 @@ class UserController extends AbstractController
             ;
             $this->mailer->send($mail);
 
-            $form = $this->createForm(CheckDirectoryType::class);
-            $form->handleRequest($request);
-           
-            if($form->isSubmitted() && $form->isValid())
-            {
-                $data = number_format($form->get('number')->getData(), 0, '', '');
-
-                if($data == $code[0]){
-                    // dd('yes');
-                    $session->remove('ValidCode');
-
-                    $individual = $invit->getIndividual();
-
-                    $directoryAccess = $session->get($individual->getId(), []);
-                
-                    $token = $this->token->generateToken();
-                    $directoryAccess = $token;
-                    $session->set($individual->getId(), [$directoryAccess]);
-                    return $this->redirectToRoute('user.directory_tenant', ['id' => $individual->getId(), 'token' => $token]);
-                }else{
-                    // dd('no', $code);
-                    $this->addFlash('error', 'mauvais code');
-                    return $this->redirectToRoute('user.directory_tenant_check', ['invitation' => $invitation]);
-                }
-            }
+            $form = $this->createForm(CheckDirectoryType::class, null, ['action' => $this->generateUrl('user.directory_tenant_check_code', ['invitation' => $invitation])]);
 
             return $this->render('user/dossier-locataire/check/index.html.twig', [
                 'form' => $form->createView(),
             ]);
+      }
+
+      /**
+       * @Route("user/dossier-locataire/{invitation}/check", name="user.directory_tenant_check_code", methods={"POST"})
+       * @param SessionInterface $session
+       * @param Request $request
+       * @param InvitationRepository $invitationRepository
+       */
+      public function checkCodeDirectoryTenant($invitation, Request $request, SessionInterface $session, InvitationRepository $invitationRepository)
+      {
+            $invit = $invitationRepository->findOneBy(['id' => $invitation]);
+
+            $data = $request->get('check_directory');
+        
+            $code = $session->get('ValidCode');
+            $number = number_format($data['number'], 0, '', '');
+
+            if($number == $code[0]){
+                
+                $session->remove('ValidCode');
+
+                $individual = $invit->getIndividual();
+
+                $session->get($individual->getId(), []);
+            
+                $token = $this->token->generateToken();
+                
+                $session->set($individual->getId(), [$token]);
+                return $this->redirectToRoute('user.directory_tenant', ['id' => $individual->getId(), 'token' => $token]);
+            }else{
+                $this->addFlash('error', 'mauvais code');
+                return $this->redirectToRoute('user.directory_tenant_check_email', ['invitation' => $invitation]);
+            }
       }
 
       /**
@@ -697,6 +803,7 @@ class UserController extends AbstractController
        * @param Document $document
        * @param UploadFilesHelper $upload
        * @param SessionInterface $session
+       * @param Security $security
        */
       public function DisplayDocument($token, Document $document, UploadFilesHelper $upload, SessionInterface $session, Security $security)
       {
@@ -772,12 +879,19 @@ class UserController extends AbstractController
       }
 
     /**
-     * @Route("user/mes-documents/{id}/check/display", name="user.document_check_dipslay")
-     * @param Document $document
+     * @Route("user/mes-garants/{id}", name="user.garant")
+     * @param IndividualRepository $individualRepository
      */
-
-    public function createDocumentPdf(Document $document)
+    public function MyGuarantors($id, IndividualRepository $individualRepository)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
+        $individual = $individualRepository->findOneByIdUser($id);
+        $garants = $individual->getIndividuals();
+        foreach ($garants as $garant){
+            dd($garant);
+        }
     }
+
+
 }

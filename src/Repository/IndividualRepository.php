@@ -36,15 +36,28 @@ class IndividualRepository extends ServiceEntityRepository
     }
     */
 
-    /*
-    public function findOneBySomeField($value): ?Individual
+    
+    public function findOneByUser($user): ?Individual
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('i.user = :user')
+            ->setParameter('user', $user)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
-    */
+
+    public function findOneByIdUser($id): ?Individual
+    {
+        return $this->createQueryBuilder('i')
+            ->innerJoin('i.user', 'user')
+            ->addSelect('user')
+
+            ->andWhere('user.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+    
 }

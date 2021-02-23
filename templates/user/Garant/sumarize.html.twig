@@ -1,0 +1,64 @@
+{% extends "base.html.twig" %}
+
+{% block title %} Résumer des informations garant{% endblock %}
+{% block body %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2>Information à prendre en compte si vous devenez garant</h2>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Corporis quia quibusdam earum dolorum 
+                    neque id sed minima dolores nesciunt ab? Tempore voluptatem sint minima, voluptate iusto amet unde recusandae
+                    minus dolores quas laboriosam nulla soluta veritatis aliquid dolorem nobis porro similique officia ducimus cumque 
+                    fugiat blanditiis nam libero nisi. Quisquam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam tempore et 
+                    voluptatibus alias, magni fugiat natus aspernatur, dolor provident praesentium temporibus quibusdam placeat aperiam 
+                    tenetur nisi officia! Enim qui praesentium nisi at deserunt architecto aspernatur atque, cumque eligendi quam voluptas 
+                    numquam id, ab assumenda! Rerum totam ducimus quas libero molestiae.
+                </div>
+                <div class="col-6">
+                    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Corporis quia quibusdam earum dolorum 
+                    neque id sed minima dolores nesciunt ab? Tempore voluptatem sint minima, voluptate iusto amet unde recusandae
+                    minus dolores quas laboriosam nulla soluta veritatis aliquid dolorem nobis porro similique officia ducimus cumque 
+                    fugiat blanditiis nam libero nisi. Quisquam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam tempore et 
+                    voluptatibus alias, magni fugiat natus aspernatur, dolor provident praesentium temporibus quibusdam placeat aperiam 
+                    tenetur nisi officia! Enim qui praesentium nisi at deserunt architecto aspernatur atque, cumque eligendi quam voluptas 
+                    numquam id, ab assumenda! Rerum totam ducimus quas libero molestiae.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <a href="{{ path('home.index') }}" class="btn btn-outline-secondary mt-5 text-end">Annuler</a>
+                </div>
+                <div class="col-6">
+                     <!-- Declenchement de modal garant -->
+                    <button class="btn btn-outline-primary mt-5" data-bs-toggle="modal" data-bs-target="#GarantModal">
+                        Devenir garant
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ <!-- Modal garant -->
+            <div class="modal fade" id="GarantModal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
+                 <div class="modal-dialog">
+                     <div class="modal-content">
+                         <div class="modal-header">
+                             <h5 class="modal-title" id="delete-modal-label">Devenir garant</h5>
+                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                         </div>
+                         <div class="modal-body">
+                            Si vous appuyez sur "Devenir garant" nous consideront que vous avez bien lu les mentions garants ainsi
+                            que les informations liés au garant. Voulez-vous continué ? 
+                         </div>
+                        <div class="modal-footer">
+                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <a href="{{ path('user.tenant_garant-activate', {'id' : id, 'token' : token}) }}" class="btn btn-outline-primary">Devenir garant</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+{% endblock %}
