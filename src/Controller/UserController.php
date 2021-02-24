@@ -371,6 +371,8 @@ class UserController extends AbstractController
       */
       public function EditInformations(Request $request, User $user, IndividualDataService $individualDataService, IndividualDataRepository $individualDataRepository)
       {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
           $individual = $user->getIndividual();
 
           $datas = $individualDataRepository->getDataByIndividualAndProfile($individual, 'tenant');
@@ -391,7 +393,7 @@ class UserController extends AbstractController
 
           $formDoc = $this->createForm(DocumentType::class, null, ['action' => $this->generateUrl('user.tenant_upload_doc', ['id' => $user->getId()]), 'method' => 'POST']);
           $formInvitation = $this->createForm(InvitationType::class, null, ['action' => $this->generateUrl('user.tenant_invitation', ['id' => $user->getId()]), 'method' => 'POST']);
-          $formGarant = $this->createForm(CreateGarantType::class, null, ['action' => $this->generateUrl('user.tenant_garant', ['id' => $user->getId()]), 'method' => 'POST']);
+          
 
 
           return $this->render('user/Dashboard/information/identity/index.html.twig', [
@@ -399,101 +401,9 @@ class UserController extends AbstractController
             'datas' => $datas,
             'formDoc' => $formDoc->createView(),
             'formInvitation' => $formInvitation->createView(),
-            'formGarant' => $formGarant->createView(),
           ]);
       }
 
-    /**
-    * @Route("user/mes-informations-locataire/{id}/create-garant", name="user.tenant_garant", methods={"POST"})
-    * @param Request $request
-    * @param int $id
-    */
-    public function createGarant($id, Request $request)
-    {
-        $data = $request->get('create_garant');
-
-        $email = (new TemplatedEmail())
-        ->from('mon-dossier-immo@support.com')
-        ->to($data['email'])
-        ->replyTo('mon-dossier-immo@support.com')
-        ->subject('Vous avez reçu une demande de garant')
-        ->context([
-             'user' => $this->getUser()
-            ])
-        ->htmlTemplate('mail_template/create-garant/index.html.twig')
-        ;
-
-        $this->mailer->send($email);
-
-        $this->addFlash('success', 'Votre demande de garant à bien été envoyé à l\'email précisé !');
-        return $this->redirectToRoute('user.information_tenant', ['id' => $id]);
-            
-    }
-
-    /**
-    * @Route("user/mes-informations-locataire/{id}/active-garant", name="user.tenant_garant-summarize", methods={"GET"})
-    * @param Request $request
-    * @param int $id
-    * @param SessionInterface $session
-    * @param UriSigner $signer
-    */
-    public function SummarizeGarant($id, SessionInterface $session, Request $request, UriSigner $signer)
-    {
-        $signer->checkRequest($request);
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        $session->remove($id);
-        $session->get($id, []);
-        $token = $this->token->generateToken();  
-        $session->set($id, $token);  
-        // dd($session->get($id));    
-        
-        return $this->render('user/Garant/sumarize.html.twig', [
-            'id' => $id,
-            'token' => $token
-        ]);  
-    }
-
-    /**
-    * @Route("user/mes-informations-locataire/{id}/active-garant/{token}", name="user.tenant_garant-activate")
-    * @param string $token
-    * @param int $id
-    * @param SessionInterface $session
-    * @param Security $security
-    * @param IndividualRepository $individualRepository
-    */
-    public function activeGarant($id, $token, SessionInterface $session, Security $security, IndividualRepository $individualRepository)
-    {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        // dd($session->get($id));
-        if($session->get($id) !== $token){
-            $this->addFlash('error', 'une erreur c\'est produite.');
-            return $this->redirectToRoute('home.index');
-        }
-
-        $user = $security->getUser();
-        $garant = $individualRepository->findOneByUser($user);
-        
-        $user = $this->userRepository->findOneBy(['id' => $id]);
-        $individual = $user->getIndividual();
-
-        $verif = [];
-        foreach ($individual->getIndividuals() as $individu){
-            array_push($verif, $individu->getId());
-        }
-
-        if(in_array($garant->getId(), $verif)){
-            $this->addFlash('error', 'Vous êtes déjà garants de cette personne.');
-            return $this->redirectToRoute('home.index');
-        }
-
-        $individual->addIndividual($garant);
-        $this->manager->persist($individual);
-        $this->manager->flush();
-
-        $this->addFlash('success', 'Vous êtes maintenant garant !');
-        return $this->redirectToRoute('home.index');
-  
-    }
 
     /**
     * @Route("user/mes-informations-locataire/{id}/create-invitation", name="user.tenant_invitation", methods={"POST"})
@@ -879,19 +789,159 @@ class UserController extends AbstractController
       }
 
     /**
-     * @Route("user/mes-garants/{id}", name="user.garant")
+     * @Route("user/mes-garants/{id}", name="user.garant", methods={"GET"})
      * @param IndividualRepository $individualRepository
+     * @param IndividualDataRepository $individualDataRepository
      */
-    public function MyGuarantors($id, IndividualRepository $individualRepository)
+    public function EditGuarant($id, IndividualRepository $individualRepository, IndividualDataRepository $individualDataRepository)
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
-        
+        $formGarant = $this->createForm(CreateGarantType::class, null, ['action' => $this->generateUrl('user.tenant_garant', ['id' => $this->getUser()->getId()]), 'method' => 'POST']);
+        $InfoGarant = [];
+
         $individual = $individualRepository->findOneByIdUser($id);
         $garants = $individual->getIndividuals();
         foreach ($garants as $garant){
-            dd($garant);
+            $lastname = $individualDataRepository->getDataByCode($garant, 'lastname');
+            $firstname = $individualDataRepository->getDataByCode($garant, 'firstname');
+            $birthDate = $individualDataRepository->getDataByCode($garant, 'birth_date');
+            $email = $garant->getUser()->getEmail();
+
+            $Info = [
+                'id' => $garant->getId(), 
+                'firstname' => $firstname->getData(), 
+                'lastname' => $lastname->getData(), 
+                'birth_date' => $birthDate->getData(),
+                'email' => $email
+            ];
+
+            array_push($InfoGarant, $Info);
         }
+
+        // dd($InfoGarant);
+        return $this->render('user/Dashboard/information/Garant/index.html.twig', [
+            'infoGarants' => $InfoGarant,
+            'formGarant' => $formGarant->createView(),
+        ]);
     }
 
+    /**
+    * @Route("user/mes-garants/{id}/delete", name="user.garant_delete", methods={"GET"})
+    * @param IndividualRepository $individualRepository
+    */
+    public function deleteGarant($id, IndividualRepository $individualRepository)
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
+        $individual = $individualRepository->findOneByUser($this->getUser());
+        $garant = $individualRepository->findOneBy(['id' => $id]);
+        
+        $individual->removeIndividual($garant);
+        $this->manager->persist($individual);
+        $this->manager->flush();
+
+        $this->addFlash('success', 'Votre garant à bien été supprimée');
+        return $this->redirectToRoute('user.garant', ['id' => $this->getUser()->getId()]);
+        
+    }
+
+    /**
+    * @Route("user/mes-informations-locataire/{id}/create-garant", name="user.tenant_garant", methods={"POST"})
+    * @param Request $request
+    * @param int $id
+    */
+    public function createGarant($id, Request $request)
+    {
+        $data = $request->get('create_garant');
+
+        $email = (new TemplatedEmail())
+        ->from('mon-dossier-immo@support.com')
+        ->to($data['email'])
+        ->replyTo('mon-dossier-immo@support.com')
+        ->subject('Vous avez reçu une demande de garant')
+        ->context([
+             'user' => $this->getUser()
+            ])
+        ->htmlTemplate('mail_template/create-garant/index.html.twig')
+        ;
+
+        $this->mailer->send($email);
+
+        $this->addFlash('success', 'Votre demande de garant à bien été envoyé à l\'email précisé !');
+        return $this->redirectToRoute('user.garant', ['id' => $id]);
+            
+    }
+
+    /**
+    * @Route("user/mes-informations-locataire/{id}/active-garant", name="user.tenant_garant-summarize", methods={"GET"})
+    * @param Request $request
+    * @param int $id
+    * @param SessionInterface $session
+    * @param UriSigner $signer
+    */
+    public function SummarizeGarant($id, SessionInterface $session, Request $request, UriSigner $signer)
+    {
+        $signer->checkRequest($request);
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $session->remove($id);
+        $session->get($id, []);
+        $token = $this->token->generateToken();  
+        $session->set($id, $token);  
+        // dd($session->get($id));    
+        
+        return $this->render('user/Dashboard/information/Garant/sumarize.html.twig', [
+            'id' => $id,
+            'token' => $token
+        ]);  
+    }
+
+    /**
+    * @Route("user/mes-informations-locataire/{id}/active-garant/{token}", name="user.tenant_garant-activate")
+    * @param string $token
+    * @param int $id
+    * @param SessionInterface $session
+    * @param Security $security
+    * @param IndividualRepository $individualRepository
+    */
+    public function activeGarant($id, $token, SessionInterface $session, Security $security, IndividualRepository $individualRepository)
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        // dd($session->get($id));
+        if($session->get($id) !== $token){
+            $this->addFlash('error', 'une erreur c\'est produite.');
+            return $this->redirectToRoute('home.index');
+        }
+
+        $user = $security->getUser();
+        $garant = $individualRepository->findOneByUser($user);
+        
+        $user = $this->userRepository->findOneBy(['id' => $id]);
+        $individual = $user->getIndividual();
+
+        $verif = [];
+        foreach ($individual->getIndividuals() as $individu){
+            array_push($verif, $individu->getId());
+        }
+
+        if(in_array($garant->getId(), $verif)){
+            $this->addFlash('error', 'Vous êtes déjà garants de cette personne.');
+            return $this->redirectToRoute('home.index');
+        }
+
+        $individual->addIndividual($garant);
+        $this->manager->persist($individual);
+        $this->manager->flush();
+
+        $this->addFlash('success', 'Vous êtes maintenant garant !');
+        return $this->redirectToRoute('home.index');
+  
+    }
+
+    /**
+     * @Route("user/mes-revenues/{id}", name="user.revenues")
+     */
+    public function EditRevenues()
+    {
+
+    }
 }

@@ -55,27 +55,22 @@
                     {{ form_end(formDoc) }}
                     </div>
                 </div>
-               {% if formInvitation is defined and formGarant is defined %}
+               {% if formInvitation is defined %}
                 <div class="row">
-                    <div class="col-6">
+                    <div class="col-12">
                         <!-- Declenchement de modal invitation -->
                         <button class="btn btn-outline-primary mt-5" data-bs-toggle="modal" data-bs-target="#invitationModal">
                             Créer une invitation<i class="fas fa-plus-circle"></i>
                         </button>
                     </div>
-                    <div class="col-6">
-                        <!-- Declenchement de modal garant -->
-                        <button class="btn btn-outline-success mt-5" data-bs-toggle="modal" data-bs-target="#GarantModal">
-                            Ajouter un garant<i class="fas fa-plus-circle"></i>
-                        </button>
-                    </div>
+                    
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
-{% if formInvitation is defined and formGarant is defined %}
+{% if formInvitation is defined %}
     <!-- Modal invitation -->
             <div class="modal fade" id="invitationModal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
                  <div class="modal-dialog">
@@ -93,27 +88,6 @@
                             <button type="submit" class="btn btn-outline-primary">Créer une invitation</button>
                         </div>
                         {{ form_end(formInvitation) }}
-                    </div>
-                </div>
-            </div>
-
-     <!-- Modal garant -->
-            <div class="modal fade" id="GarantModal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
-                 <div class="modal-dialog">
-                     <div class="modal-content">
-                         <div class="modal-header">
-                             <h5 class="modal-title" id="delete-modal-label">Ajouter un garant</h5>
-                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                         </div>
-                         <div class="modal-body">
-                            {{ form_start(formGarant) }}
-                            {{ form_widget(formGarant) }}
-                         </div>
-                        <div class="modal-footer">
-                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn btn-outline-primary">Ajouter un garant</button>
-                        </div>
-                        {{ form_end(formGarant) }}
                     </div>
                 </div>
             </div>

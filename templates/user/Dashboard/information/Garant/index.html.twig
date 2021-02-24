@@ -1,0 +1,64 @@
+{% extends "user/Dashboard/information/base.html.twig"%}
+
+{% block title %} Mes garants {% endblock %}
+
+{% block functionality %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h3>Liste de mes garants :</h3>
+            </div>
+            {% for garant in infoGarants%}
+                    <div class="col-2 text-end">
+                        <a href="{{ path('user.garant_delete', {'id' : garant.id}) }}" class="btn btn-lg btn-outline-danger mt-3"><i class="fas fa-times"></i></a>
+                    </div>
+                    <div class="col-10 mt-3 text-start">
+                        <div class="btn-group">
+                            <button class="btn btn-secondary btn-lg" type="button">
+                                {{ garant.firstname }} {{ garant.lastname }}
+                            </button>
+                            <button type="button" class="btn btn-lg btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-item">{{ garant.birth_date }}</li>
+                                <li class="dropdown-item">{{ garant.email }}</li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#">Voir la fiche du garant</a></li>
+                            </ul>
+                        </div>
+                    </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <div class="col-12">
+            <!-- Declenchement de modal garant -->
+                <button class="btn btn-outline-success mt-5" data-bs-toggle="modal" data-bs-target="#GarantModal">
+                    Ajouter un garant<i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Modal garant -->
+            <div class="modal fade" id="GarantModal" tabindex="-1" aria-labelledby="delete-modal-label" aria-hidden="true">
+                 <div class="modal-dialog">
+                     <div class="modal-content">
+                         <div class="modal-header">
+                             <h5 class="modal-title" id="delete-modal-label">Ajouter un garant</h5>
+                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                         </div>
+                         <div class="modal-body">
+                            {{ form_start(formGarant) }}
+                            {{ form_widget(formGarant) }}
+                         </div>
+                        <div class="modal-footer">
+                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-outline-primary">Ajouter un garant</button>
+                        </div>
+                        {{ form_end(formGarant) }}
+                    </div>
+                </div>
+            </div>
+{% endblock %}
