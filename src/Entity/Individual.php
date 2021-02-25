@@ -55,6 +55,16 @@ class Individual
      */
     private $invitations;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Income::class, mappedBy="individual", orphanRemoval=true)
+     */
+    private $incomes;
+
+    /**
+     * @ORM\OneToMany(targetEntity=IncomeYear::class, mappedBy="individual")
+     */
+    private $incomeYears;
+
     public function __construct()
     {
         $this->individualData = new ArrayCollection();
@@ -63,6 +73,8 @@ class Individual
         $this->profiles = new ArrayCollection();
         $this->documents = new ArrayCollection();
         $this->invitations = new ArrayCollection();
+        $this->incomes = new ArrayCollection();
+        $this->incomeYears = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -241,6 +253,66 @@ class Individual
             // set the owning side to null (unless already changed)
             if ($invitation->getIndividual() === $this) {
                 $invitation->setIndividual(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Income[]
+     */
+    public function getIncomes(): Collection
+    {
+        return $this->incomes;
+    }
+
+    public function addIncome(Income $income): self
+    {
+        if (!$this->incomes->contains($income)) {
+            $this->incomes[] = $income;
+            $income->setIndividual($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIncome(Income $income): self
+    {
+        if ($this->incomes->removeElement($income)) {
+            // set the owning side to null (unless already changed)
+            if ($income->getIndividual() === $this) {
+                $income->setIndividual(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|IncomeYear[]
+     */
+    public function getIncomeYears(): Collection
+    {
+        return $this->incomeYears;
+    }
+
+    public function addIncomeYear(IncomeYear $incomeYear): self
+    {
+        if (!$this->incomeYears->contains($incomeYear)) {
+            $this->incomeYears[] = $incomeYear;
+            $incomeYear->setIndividual($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIncomeYear(IncomeYear $incomeYear): self
+    {
+        if ($this->incomeYears->removeElement($incomeYear)) {
+            // set the owning side to null (unless already changed)
+            if ($incomeYear->getIndividual() === $this) {
+                $incomeYear->setIndividual(null);
             }
         }
 

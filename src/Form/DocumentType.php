@@ -14,30 +14,31 @@ class DocumentType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
-            ->add('data', FileType::class, [
+        $form = $builder->add('data', FileType::class, [
                 'label' => 'Votre Document',
                 'attr' => ['class' =>'form-control'],
                 'required' => true,
                 'constraints' => [
-                    new NotBlank()
-                ]
-                ])
-            ->add('label', TextType::class, [
-                'label' => 'Le titre de votre document',
-                'attr' => ['class' => 'form-control'],
-                'required' => true,
-                'constraints' => [
-                    new NotBlank()
-                ]
-            ])
-        ;
+                        new NotBlank()
+                    ]
+                ]);
+            if($options['data_label'] !== null){
+                $form ->add($options['data_label'], TextType::class, [
+                    'label' => 'Le titre de votre document',
+                    'attr' => ['class' => 'form-control'],
+                    'required' => true,
+                    'constraints' => [
+                        new NotBlank()
+                    ]
+                ]);
+            }
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'data_class' => Document::class,
+            'data_label' => null,
         ]);
     }
 }

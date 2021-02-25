@@ -4,28 +4,30 @@ namespace App\Controller;
 
 
 use App\Entity\User;
+use App\Entity\Income;
 use App\Form\UserType;
-use GuzzleHttp\Client;
 use App\Entity\Document;
+use App\Form\IncomeType;
+use App\Entity\IncomeYear;
 use App\Entity\Individual;
 use App\Entity\Invitation;
 use App\Form\DocumentType;
 use App\Form\EditUserType;
 use App\Form\IdentityType;
-use PhpParser\Comment\Doc;
 use App\Form\InvitationType;
-use App\Entity\IndividualData;
 use App\Form\CreateGarantType;
-use App\Entity\ProfilModelData;
 use App\Form\CheckDirectoryType;
 use App\Form\EditUserPasswordType;
 use App\Form\PasswordRecoveryType;
 use App\Repository\UserRepository;
 use App\Form\PasswordResettingType;
 use App\Services\UploadFilesHelper;
+use App\Repository\IncomeRepository;
 use App\Repository\DocumentRepository;
 use App\Repository\ProfilesRepository;
 use App\Services\IndividualDataService;
+use App\Repository\IncomeTypeRepository;
+use App\Repository\IncomeYearRepository;
 use App\Repository\IndividualRepository;
 use App\Repository\InvitationRepository;
 use App\Security\LoginFormAuthenficator;
@@ -33,7 +35,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\UriSigner;
 use App\Repository\IndividualDataRepository;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use App\Repository\ProfilModelDataRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Security\Core\Security;
@@ -391,7 +392,7 @@ class UserController extends AbstractController
 
           }
 
-          $formDoc = $this->createForm(DocumentType::class, null, ['action' => $this->generateUrl('user.tenant_upload_doc', ['id' => $user->getId()]), 'method' => 'POST']);
+          $formDoc = $this->createForm(DocumentType::class, null, ['data_label' => 'label', 'action' => $this->generateUrl('user.tenant_upload_doc', ['id' => $user->getId()]), 'method' => 'POST']);
           $formInvitation = $this->createForm(InvitationType::class, null, ['action' => $this->generateUrl('user.tenant_invitation', ['id' => $user->getId()]), 'method' => 'POST']);
           
 
@@ -470,7 +471,7 @@ class UserController extends AbstractController
 
           }
 
-          $formDoc = $this->createForm(DocumentType::class, null, ['action' => $this->generateUrl('user.seller_upload_doc', ['id' => $user->getId()]), 'method' => 'POST']);
+          $formDoc = $this->createForm(DocumentType::class, null, ['data_label' => 'label', 'action' => $this->generateUrl('user.seller_upload_doc', ['id' => $user->getId()]), 'method' => 'POST']);
 
           return $this->render('user/Dashboard/information/identity/index.html.twig', [
             'form' => $form->createView(),
@@ -597,14 +598,26 @@ class UserController extends AbstractController
        * @Route("/user/mes-documents/{id}", name="user.document")
        * @param User $user
        * @param DocumentRepository $documentRepository
+       * @param IndividualDataCategoryRepository $individualDataCategory
        */
-      public function EditDocument(User $user, DocumentRepository $documentRepository)
+      public function EditDocument(User $user, DocumentRepository $documentRepository, IndividualDataCategoryRepository $individualDataCategoryRepository)
       {
             $individual = $user->getIndividual();
-
-            $documents = $documentRepository->findBy(["individual" => $individual]);
             
+            $documents = [];
 
+            $identity = $individualDataCategoryRepository->findOneBy(["code" => 'identity']);
+            $domiciliation = $individualDataCategoryRepository->findOneBy(["code" => 'domiciliation']);
+
+            $domiciliations = $documentRepository->findBy(["individual" => $individual, "category" => $domiciliation]);
+            foreach ($domiciliations as $domiciliation){
+                array_push($documents, $domiciliation);
+            }
+            $identitys = $documentRepository->findBy(["individual" => $individual, "category" => $identity]);
+            foreach ($identitys as $identity){
+                array_push($documents, $identity);
+            }
+            
             return $this->render('user/Dashboard/information/document/index.html.twig', [
                 'documents' => $documents,
             ]);
@@ -938,10 +951,205 @@ class UserController extends AbstractController
     }
 
     /**
-     * @Route("user/mes-revenues/{id}", name="user.revenues")
+     * @Route("user/mes-revenues/{id}", name="user.income", methods={"GET"})
+     * @param IncomeTypeRepository $IncomeTypeRepository
+     * @param IncomeYearRepository $incomeRepository
+     * @param IncomeRepository $incomeRepository
+     * @param DocumentRepository $documentRepository
      */
-    public function EditRevenues()
+    public function EditIcomes(IncomeTypeRepository $IncomeTypeRepository, IncomeYearRepository $incomeYearRepository, IncomeRepository $incomeRepository, DocumentRepository $documentRepository)
     {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+        $typeCode = [];
+        $IncomeType = $IncomeTypeRepository->findAll();
+        foreach ($IncomeType as $type){
+            $typeCode[$type->getLabel()] = $type->getCode();
+        }
 
+        $form = $this->createForm(IncomeType::class, null, ['data_type' => $typeCode]);
+        $formDocYear = $this->createForm(DocumentType::class, null, ['data_label' => 'label', 'method' => 'POST']);
+        $formDocIncome = $this->createForm(DocumentType::class, null, ['method' => 'POST']);  
+
+        $income = [];
+
+        $incomeYears = $incomeYearRepository->findBy(['individual' => $this->getUser()->getIndividual()]);
+
+        foreach($incomeYears as $incomeYear){
+            $documents = $documentRepository->findByYearAndIndividual($incomeYear, $this->getUser()->getIndividual());
+
+            $income[$incomeYear->getCode()]['document'] = $documents;
+        }
+
+        foreach($incomeYears as $incomeYear){
+            $incomes = $incomeRepository->findBy(['incomeYear' => $incomeYear]);
+            $income[$incomeYear->getCode()]['incomes'] = $incomes;
+
+            foreach($incomes as $inc){
+                if(array_key_exists('amount', $income[$incomeYear->getCode()])){
+                    $income[$incomeYear->getCode()]['amount'] = $inc->getAmount() + $income[$incomeYear->getCode()]['amount'];
+                }else{
+                    $income[$incomeYear->getCode()]['amount'] = $inc->getAmount();
+                }
+            }
+
+            $income[$incomeYear->getCode()]['amount'] = str_replace('.', ',', $income[$incomeYear->getCode()]['amount']);
+        }
+        
+        // dd($income);
+
+        return $this->render('user/Dashboard/information/income/index.html.twig', [
+            'form' => $form->createView(),
+            'incomes' => $income,
+            'formDocYear' => $formDocYear->createView(),
+            'formDocIncome' => $formDocIncome->createView(),
+        ]);
     }
+
+    /**
+     * @Route("user/mes-revenues/{id}", name="user.income_create_income", methods={"POST"})
+     * @param Request $request
+     * @param IncomeTypeRepository $incomeTypeRepository
+     * @param IncomeYearRepository $IncomeYearRepository
+     */
+    public function AddIcomes($id, Request $request, IncomeTypeRepository $incomeTypeRepository, IncomeYearRepository $incomeYearRepository)
+    {
+       $this->denyAccessUnlessGranted('ROLE_USER');
+
+       $individual = $this->getUser()->getIndividual();
+       $data = $request->get('income');
+       $year = $incomeYearRepository->findOneBy(['code' => $data['year']]);
+       $type = $incomeTypeRepository->findOneBy(['code' => $data['type']]);
+       $number = str_replace(',', '.', $data['amount']);
+
+       $income = new Income();
+       $income->setLabel($data['label']);
+       $income->setAmount($number);
+       if( $year === null ){
+           $IncomeYear = new IncomeYear();
+           $IncomeYear->setCode($data['year']);
+           $IncomeYear->setIndividual($individual);
+           $this->manager->persist($IncomeYear);
+
+           $income->setIncomeYear($IncomeYear);     
+       }else{
+           $income->setIncomeYear($year);
+       }
+       $income->setType($type);
+       $income->setIndividual($individual);
+       $this->manager->persist($income);
+       $this->manager->flush();
+
+       $this->addFlash('success', 'Votre revenue à bien été publié.');
+       return $this->redirectToRoute('user.income', ['id' => $id]);
+    }
+
+    /**
+     * @Route("user/mes-revenues/{id}/{code}/upload", name="user.income_upload_year", methods={"POST"})
+     * @param string $code
+     * @param Request $request
+     * @param IndividualDataCategoryRepository $categoryRepository
+     * @param  ProfilesRepository $profileRepository
+     * @param UploadFilesHelper $uploadFilesHelper
+     * @param ValidatorInterface $validator
+     * @param IncomeYearRepository $incomeYearRepository
+     */
+    public function uploadDocIncomeYear($code, Request $request, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository, UploadFilesHelper $uploadFilesHelper, ValidatorInterface $validator, IncomeYearRepository $incomeYearRepository)
+    {
+        // dd($request->get('document'));
+        $individual = $this->getUser()->getIndividual();
+
+        // Récupération du document
+        $file = $request->files->get('document');
+
+        // Récupération du titre du document
+        $label = $request->get('document');
+
+        $category = $categoryRepository->findOneBy(['code' => 'incomes']);
+        $profile = $profileRepository->findOneBy(['code' => 'tenant']);
+
+        $violations = $validator->validate($file['data'], [new File([
+            'maxSize' => '10000k', 
+            'maxSizeMessage' => 'Le fichier est trop volumineux. Maximun autorisé : 1ko',
+            'mimeTypes' => [
+                'image/*',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'text/plain'
+            ],
+            'mimeTypesMessage' => 'Type de fichier invalide']),
+            New NotBlank(['message' => 'Merci de séléctionner un fichier.'])
+        ]);
+
+
+        if($violations->count() > 0){
+            $violations = $violations[0];
+            $this->addFlash('error', $violations->getMessage());
+            return $this->redirectToRoute('user.income', ['id' => $this->getUser()->getId()]);
+        }
+        
+        $year = $incomeYearRepository->findOneByCodeAndIndividual( $code, $individual);
+
+        $uploadFilesHelper->uploadFilePrivate($file['data'], $label['label'], $individual, $category, $profile, null, $year);
+
+        $this->addFlash('success', 'Votre revenue pour l\'année '.$code.' à bien été téléchargé.');
+        return $this->redirectToRoute('user.income', ['id' => $this->getUser()->getId()]);
+    }
+
+        /**
+     * @Route("user/mes-revenues/{id}/upload/{income}", name="user.income_upload", methods={"POST"})
+     * @param int $income
+     * @param Request $request
+     * @param IndividualDataCategoryRepository $categoryRepository
+     * @param  ProfilesRepository $profileRepository
+     * @param UploadFilesHelper $uploadFilesHelper
+     * @param ValidatorInterface $validator
+     * @param IncomeRepository $incomeRepository
+     */
+    public function uploadDocIncome($income, Request $request, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository, UploadFilesHelper $uploadFilesHelper, ValidatorInterface $validator, IncomeRepository $incomeRepository)
+    {
+        // dd($request->files->get('document'));
+        $individual = $this->getUser()->getIndividual();
+
+        // Récupération du document
+        $file = $request->files->get('document');
+
+        $category = $categoryRepository->findOneBy(['code' => 'incomes']);
+        $profile = $profileRepository->findOneBy(['code' => 'tenant']);
+
+        $violations = $validator->validate($file['data'], [new File([
+            'maxSize' => '10000k', 
+            'maxSizeMessage' => 'Le fichier est trop volumineux. Maximun autorisé : 1ko',
+            'mimeTypes' => [
+                'image/*',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'text/plain'
+            ],
+            'mimeTypesMessage' => 'Type de fichier invalide']),
+            New NotBlank(['message' => 'Merci de séléctionner un fichier.'])
+        ]);
+
+
+        if($violations->count() > 0){
+            $violations = $violations[0];
+            $this->addFlash('error', $violations->getMessage());
+            return $this->redirectToRoute('user.income', ['id' => $this->getUser()->getId()]);
+        }
+        
+        $incomeData = $incomeRepository->findOneBy(['id' => $income]);
+
+        $uploadFilesHelper->uploadFilePrivate($file['data'], $incomeData->getLabel(), $individual, $category, $profile, $incomeData, null);
+
+        $this->addFlash('success', 'Votre document associé au revenue '.$incomeData->getLabel().' à bien été téléchargé.');
+        return $this->redirectToRoute('user.income', ['id' => $this->getUser()->getId()]);
+    }
+
 }

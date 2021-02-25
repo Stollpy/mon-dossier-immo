@@ -49,6 +49,16 @@ class Document
      */
     private $profile;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Income::class, inversedBy="document")
+     */
+    private $income;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=IncomeYear::class, inversedBy="document")
+     */
+    private $incomeYear;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -127,6 +137,30 @@ class Document
     public function setProfile(?Profiles $profile): self
     {
         $this->profile = $profile;
+
+        return $this;
+    }
+
+    public function getIncome(): ?Income
+    {
+        return $this->income;
+    }
+
+    public function setIncome(?Income $income): self
+    {
+        $this->income = $income;
+
+        return $this;
+    }
+
+    public function getIncomeYear(): ?IncomeYear
+    {
+        return $this->incomeYear;
+    }
+
+    public function setIncomeYear(?IncomeYear $incomeYear): self
+    {
+        $this->incomeYear = $incomeYear;
 
         return $this;
     }
