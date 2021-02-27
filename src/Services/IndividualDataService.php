@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entity\Individual;
+use App\Entity\Invitation;
 use App\Entity\IndividualData;
 use App\Repository\ProfilesRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,17 +28,19 @@ class IndividualDataService {
         $this->individualDataRepository = $individualDataRepository;
     }
 
-    public function CreateIndividual($user, $profiles){
+    public function CreateIndividual($user, $parentProfile){
+        $profile = $this->profilesRepository->findOneBy(['code' => $parentProfile]);
+        $profiles = $profile->getProfiles();
 
-            $individual = new Individual();
-            $individual->setUser($user);
-            foreach ($profiles->getProfiles() as $profile){
-                $individual->addProfile($profile);
-            }
-            $this->manager->persist($individual); 
-            $this->manager->flush();
+        $individual = new Individual();
+        $individual->setUser($user);
+        foreach ($profiles as $profile){
+            $individual->addProfile($profile);
+        }
+        $this->manager->persist($individual); 
+        $this->manager->flush();
 
-            $this->CreateIndividualData($individual);
+            // $this->CreateIndividualData($individual);
     }
 
     public function CreateIndividualData(Individual $individual)
@@ -97,5 +100,16 @@ class IndividualDataService {
         }
 
         $this->manager->flush();
+    }
+
+    public function InvitationCreate(string $email, Individual $individual)
+    {
+        $invitation = new Invitation();
+        $invitation->setEmail($email);
+        $invitation->setIndividual($individual);
+        $this->manager->persist($invitation);
+        $this->manager->flush();
+
+        return $invitation;
     }
 }

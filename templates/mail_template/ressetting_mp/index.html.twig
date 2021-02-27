@@ -647,7 +647,7 @@
                                                         <tr>
                                                             <td>
                                                                 <p>
-                                                                    <a href="{{absolute_url(path('user.resetting', {'id': user.id, 'token': user.PasswordToken}))}}">Réinisialitation de mon mot de passe</a>
+                                                                    <a href="{{absolute_url(path('user.resetting', {'id': context.user.id, 'token': context.user.PasswordToken}))}}">Réinisialitation de mon mot de passe</a>
                                                                 </p>
                                                             </td>
                                                         </tr>

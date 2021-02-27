@@ -56,7 +56,7 @@
                          </div>
                         <div class="modal-footer">
                              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                            <a href="{{ path('user.tenant_garant-activate', {'id' : id, 'token' : token}) }}" class="btn btn-outline-primary">Devenir garant</a>
+                            <a href="{{ path('guarantor.create-invitation-activate', {'id' : id, 'token' : token}) }}" class="btn btn-outline-primary">Devenir garant</a>
                         </div>
                     </div>
                 </div>

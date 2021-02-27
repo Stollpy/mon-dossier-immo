@@ -28,17 +28,17 @@
                                     </td>
                                     <th scope="row">{{ document.label }}</th>
                                     <td>
-                                        <a href="{{ path('user.document_download', {'id': document.id, 'token' : document.label}) }}" class="btn btn-outline-primary">
+                                        <a href="{{ path('document.download', {'id': document.id, 'token' : document.label}) }}" class="btn btn-outline-primary">
                                             <i class="fas fa-download"></i>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="{{ path('user.document_display', {'id' : document.id, 'token' : document.label}) }}" class="btn btn-outline-primary">
+                                        <a href="{{ path('document.display', {'id' : document.id, 'token' : document.label}) }}" class="btn btn-outline-primary">
                                             <i class="far fa-eye"></i>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="{{ path('user.document_delete', {'id' : document.id}) }}" class="btn btn-outline-danger">
+                                        <a href="{{ path('document.delete', {'id' : document.id}) }}" class="btn btn-outline-danger">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </td>

@@ -40,12 +40,12 @@
                                 <tr class="text-center">
                                     <th scope="row">{{ document.label }}</th>
                                     <td>
-                                        <a href="{{ path('user.document_download', {'id': document.id, 'token' : token}) }}" class="btn btn-outline-primary">
+                                        <a href="{{ path('document.download', {'id': document.id, 'token' : token}) }}" class="btn btn-outline-primary">
                                             <i class="fas fa-download"></i>
                                         </a>
                                     </td>
                                     <td>
-                                        <a href="{{ path('user.document_display', {'id' : document.id, 'token' : token}) }}" class="btn btn-outline-primary">
+                                        <a href="{{ path('document.display', {'id' : document.id, 'token' : token}) }}" class="btn btn-outline-primary">
                                             <i class="far fa-eye"></i>
                                         </a>
                                     </td>

@@ -36,13 +36,13 @@
                                                 <p>
                                                     {{ document.label }} - 
                                                     <span>
-                                                        <a href="{{ path('user.document_download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="far fa-eye"></i></a>
+                                                        <a href="{{ path('document.download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="far fa-eye"></i></a>
                                                     </span>
                                                     <span>
-                                                        <a href="{{ path('user.document_download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></a>
+                                                        <a href="{{ path('document.download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></a>
                                                     </span>
                                                     <span>
-                                                        <a href="{{ path('user.document_delete', {'id' : document.id}) }}" class="btn btn-sm btn-outline-danger"><i class="fas fa-times-circle"></i></a>
+                                                        <a href="{{ path('document.delete', {'id' : document.id}) }}" class="btn btn-sm btn-outline-danger"><i class="fas fa-times-circle"></i></a>
                                                     </span>
                                                  </p>
                                             {% endfor %}
@@ -89,13 +89,13 @@
                                                         <p>
                                                             <span class="text-black">{{ document.label }}</span> - 
                                                             <span>
-                                                                <a href="{{ path('user.document_download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="far fa-eye"></i></a>
+                                                                <a href="{{ path('document.download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="far fa-eye"></i></a>
                                                             </span>
                                                             <span>
-                                                                <a href="{{ path('user.document_download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></a>
+                                                                <a href="{{ path('document.download', {'id': document.id, 'token': document.label}) }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download"></i></a>
                                                             </span>
                                                             <span>
-                                                                <a href="{{ path('user.document_delete', {'id' : document.id}) }}" class="btn btn-sm btn-outline-danger"><i class="fas fa-times-circle"></i></a>
+                                                                <a href="{{ path('document.delete', {'id' : document.id}) }}" class="btn btn-sm btn-outline-danger"><i class="fas fa-times-circle"></i></a>
                                                             </span>
                                                         </p>
                                                     </div>

@@ -4,7 +4,7 @@ $("#DocYear").on('show.bs.modal', function (e) {
     // console.log(yearCode);
     const id = $(e.relatedTarget).data('id');
     // console.log(id);
-    $('#formDocYear').attr('action', `/user/mes-revenues/${id}/${yearCode}/upload`);
+    $('#formDocYear').attr('action', `/mes-revenues/${id}/${yearCode}/upload`);
     // console.log($('#formDocYear').attr('action'));
 })
 
@@ -14,6 +14,6 @@ $("#DocIncome").on('show.bs.modal', function (e) {
     // console.log(income);
     const user = $(e.relatedTarget).data('user-id');
     // console.log(user);
-    $('#formDocIncome').attr('action', `/user/mes-revenues/${user}/upload/${income}`);
+    $('#formDocIncome').attr('action', `/mes-revenues/${user}/upload/${income}`);
     // console.log($('#formDocIncome').attr('action'));
 })
