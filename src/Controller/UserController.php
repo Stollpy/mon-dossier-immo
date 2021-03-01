@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -79,9 +80,11 @@ class UserController extends AbstractController
      * @Route("/account-confirmation/{id}/{token}", name="user.account_confirmation.check")
      * @param User $user
      * @param IndividualDataService $dataService
+     * @param EntityManagerInterface $manager
+     * @param SessionInterface $session
      */
 
-    public function accountConfirmationCheck($token, User $user, IndividualDataService $dataService)
+    public function accountConfirmationCheck($token, User $user, IndividualDataService $dataService, EntityManagerInterface $manager, SessionInterface $session)
     {
         if($user->getTokenAccount() === null || $token !== $user->getTokenAccount()){
             $this->addFlash('error', 'Vous n\'êtes pas autorisé à être sur cette page !');
@@ -94,8 +97,10 @@ class UserController extends AbstractController
         $user->setIndividual($individual);
         $user->setTokenAccount(NULL);
         $user->setAccountConfirmation(1);
-        $this->manager->persist($user);
-        $this->manager->flush();
+        $manager->persist($user);
+        $manager->flush();
+
+        $session->clear();
 
         $this->addFlash('success', 'Votre compte à bien été activé, veuillez vous reconnectez.');
         return $this->redirectToRoute('security.login');

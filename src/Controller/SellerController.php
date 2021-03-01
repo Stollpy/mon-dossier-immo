@@ -140,29 +140,29 @@ class SellerController extends AbstractController
        */
       public function checkCodeDirectoryTenant($invitation, Request $request, SessionInterface $session, InvitationRepository $invitationRepository, TokenGeneratorInterface $tokenInterface)
       {
-            $invit = $invitationRepository->findOneBy(['id' => $invitation]);
+        $invit = $invitationRepository->findOneBy(['id' => $invitation]);
+        $data = $request->get('check_directory');
+        $code = $session->get('ValidCode');
 
-            $data = $request->get('check_directory');
-        
-            $code = $session->get('ValidCode');
-            $number = number_format($data['number'], 0, '', '');
+        if(!$data['number']){
+          $this->addFlash('error', 'Vous devez précisez un code !');
+          return $this->redirectToRoute('seller.directory_tenant_check_email', ['invitation' => $invitation]);
+        }
 
-            if($number == $code[0]){
-                
-                $session->remove('ValidCode');
+        $number = number_format($data['number'], 0, '', '');
+        if($number == $code[0]){
+          
+          $session->remove('ValidCode');
+          $individual = $invit->getIndividual();
+          $session->get($individual->getId(), []);
+          $token = $tokenInterface->generateToken();
+          $session->set($individual->getId(), [$token]);
 
-                $individual = $invit->getIndividual();
-
-                $session->get($individual->getId(), []);
-            
-                $token = $tokenInterface->generateToken();
-                
-                $session->set($individual->getId(), [$token]);
-                return $this->redirectToRoute('seller.directory_tenant', ['id' => $individual->getId(), 'token' => $token]);
-            }else{
-                $this->addFlash('error', 'mauvais code');
-                return $this->redirectToRoute('seller.directory_tenant_check_email', ['invitation' => $invitation]);
-            }
+          return $this->redirectToRoute('seller.directory_tenant', ['id' => $individual->getId(), 'token' => $token]);
+        }else{
+          $this->addFlash('error', 'mauvais code');
+          return $this->redirectToRoute('seller.directory_tenant_check_email', ['invitation' => $invitation]);
+        }
       }
 
       /**

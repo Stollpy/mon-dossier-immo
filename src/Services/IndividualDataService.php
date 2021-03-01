@@ -45,7 +45,7 @@ class IndividualDataService {
 
     public function CreateIndividualData(Individual $individual)
     {
-        $individualProfiles = $individual->getProfiles();
+        $parentProfiles = $individual->getProfiles();
  
          $codes = [];
 
@@ -58,7 +58,7 @@ class IndividualDataService {
          }
 
         //  Inserts les codes de modeles de données qu'un profiles à besoins 
-        foreach ($individualProfiles as $profile){
+        foreach ($parentProfiles as $profile){
             $code = $profile->getCode();
             $models = $this->profileModelDataRepository->getModelByProfil($code);
 

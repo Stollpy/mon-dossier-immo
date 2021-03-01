@@ -10,10 +10,10 @@ class MailService {
 
     private $mailer;
 
-    public function __construct(MailerInterface $mailer, $support)
+    public function __construct(MailerInterface $mailer)
     {
         $this->mailer = $mailer;
-        $this->mailSupport = $support;
+        $this->mailSupport = 'support@mon-dossier-immo.com';
     }
 
     /**
