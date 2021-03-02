@@ -19,23 +19,19 @@ class IndividualRepository extends ServiceEntityRepository
         parent::__construct($registry, Individual::class);
     }
 
-    // /**
-    //  * @return Individual[] Returns an array of Individual objects
-    //  */
-    /*
-    public function findByExampleField($value)
+     /**
+      * @return Individual[] Returns an array of Individual objects
+      */
+    
+    public function GarantIndividual($individual)
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('i.id', 'ASC')
-            ->setMaxResults(10)
+            ->where(':individual MEMBER OF i.individuals')
+            ->setParameter('individual', $individual)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
-
     
     public function findOneByUser($user): ?Individual
     {
@@ -55,6 +51,19 @@ class IndividualRepository extends ServiceEntityRepository
 
             ->andWhere('user.id = :id')
             ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    public function findOneByInvitation($invitation): ?Individual
+    {
+        return $this->createQueryBuilder('i')
+            ->innerJoin('i.invitations', 'invit')
+            ->addSelect('invit')
+
+            ->andWhere('invit.id = :invitation')
+            ->setParameter('invitation', $invitation)
             ->getQuery()
             ->getOneOrNullResult()
         ;

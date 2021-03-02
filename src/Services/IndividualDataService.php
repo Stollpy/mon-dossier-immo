@@ -9,6 +9,7 @@ use App\Repository\ProfilesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\IndividualDataRepository;
 use App\Repository\ProfilModelDataRepository;
+use App\Repository\InvitationCategoryRepository;
 
 
 class IndividualDataService {
@@ -18,14 +19,16 @@ class IndividualDataService {
     private $manager;
     private $profilesRepository;
     private $individualDataRepository;
+    private $invitationCategoryRepository;
 
     public function __construct(ProfilesRepository $profilesRepository, ProfilModelDataRepository $profileModelDataRepository, 
-    IndividualDataRepository $individualDataRepository, EntityManagerInterface $manager)
+    IndividualDataRepository $individualDataRepository, EntityManagerInterface $manager, InvitationCategoryRepository $invitationCategoryRepository)
     {
         $this->profileModelDataRepository = $profileModelDataRepository;
         $this->manager = $manager;
         $this->profilesRepository = $profilesRepository;
         $this->individualDataRepository = $individualDataRepository;
+        $this->invitationCategoryRepository = $invitationCategoryRepository;
     }
 
     public function CreateIndividual($user, $parentProfile){
@@ -102,11 +105,14 @@ class IndividualDataService {
         $this->manager->flush();
     }
 
-    public function InvitationCreate(string $email, Individual $individual)
+    public function InvitationCreate(string $email, Individual $individual, string $code)
     {
+        $category = $this->invitationCategoryRepository->findOneBy(['code' => $code]);
+
         $invitation = new Invitation();
         $invitation->setEmail($email);
         $invitation->setIndividual($individual);
+        $invitation->setInvitationCategory($category);
         $this->manager->persist($invitation);
         $this->manager->flush();
 

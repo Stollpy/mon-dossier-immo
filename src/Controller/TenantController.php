@@ -19,7 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class TenantController extends AbstractController
 {
    /**
-      * @Route("mes-informations-locataire/{id}", name="user.information_tenant")
+      * @Route("mes-informations-locataire/{id}", name="tenant.edit")
       * @param Request $request
       * @param IndividualDataService $individualDataService
       * @param IndividualDataRepository $individualDataRepository
@@ -41,7 +41,7 @@ class TenantController extends AbstractController
 
             $id = $user->getId();
             $this->addFlash('success', 'Vos données ont bien été modifié');
-            return $this->redirectToRoute('user.information_tenant', ['id' => $id]);
+            return $this->redirectToRoute('tenant.edit', ['id' => $id]);
           }
 
           $formDoc = $this->createForm(DocumentType::class, null, ['data_label' => 'label', 'action' => $this->generateUrl('tenant.upload', ['id' => $user->getId()]), 'method' => 'POST']);
@@ -69,15 +69,14 @@ class TenantController extends AbstractController
         $ref = $req['ref'];
 
         $individual = $this->getUser()->getIndividual();
-
-        $invitation = $dataService->InvitationCreate($email, $individual);
+        $invitation = $dataService->InvitationCreate($email, $individual, 'directory_tenant');
 
         $subject = 'Dossier de location pour le bien '.$ref;
         $template = 'mail_template/Dossier-location/index.html.twig';
         $mail->PostMail($email, $subject, $template, ['ref' => $ref, 'invitation' => $invitation->getId()]);
 
         $this->addFlash('success', 'Votre invitation de dossier à bien été envoyé');
-        return $this->redirectToRoute('user.information_tenant', ['id' => $this->getUser()->getId()]);
+        return $this->redirectToRoute('tenant.edit', ['id' => $this->getUser()->getId()]);
     }
 
      /**

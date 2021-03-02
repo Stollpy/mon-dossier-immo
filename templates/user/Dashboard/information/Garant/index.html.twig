@@ -6,30 +6,62 @@
 <div class="container-fluid">
     <div class="container">
         <div class="row">
-            <div class="col-12">
-                <h3>Liste de mes garants :</h3>
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-12">
+                        <h3>Liste de mes garants :</h3>
+                    </div>
+                    {% for garant in infoGarants%}
+                            <div class="col-2 text-end">
+                                <a href="{{ path('guarantor.delete', {'id' : garant.id}) }}" class="btn btn-lg btn-outline-danger mt-3"><i class="fas fa-times"></i></a>
+                            </div>
+                            <div class="col-10 mt-3 text-start">
+                                <div class="btn-group">
+                                    <button class="btn btn-secondary btn-lg" type="button">
+                                        {% if garant.firstname is defined and garant.lastname is defined and garant.firstname is not null and garant.lastname is not null %} {{ garant.firstname }} {{ garant.lastname }} {% else %} {{ garant.email }} {% endif %}
+                                    </button>
+                                    <button type="button" class="btn btn-lg btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% if garant.birth_date is defined and garant.birth_date is not null %}<li class="dropdown-item">{{ garant.birth_date }}</li>{% endif %}
+                                        <li class="dropdown-item">{{ garant.email }}</li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#">Voir la fiche du garant</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                    {% endfor %}
+                </div>
             </div>
-            {% for garant in infoGarants%}
-                    <div class="col-2 text-end">
-                        <a href="{{ path('guarantor.delete', {'id' : garant.id}) }}" class="btn btn-lg btn-outline-danger mt-3"><i class="fas fa-times"></i></a>
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-12">
+                        <h3>Je suis garant de :</h3>
                     </div>
-                    <div class="col-10 mt-3 text-start">
-                        <div class="btn-group">
-                            <button class="btn btn-secondary btn-lg" type="button">
-                                {{ garant.firstname }} {{ garant.lastname }}
-                            </button>
-                            <button type="button" class="btn btn-lg btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="visually-hidden">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li class="dropdown-item">{{ garant.birth_date }}</li>
-                                <li class="dropdown-item">{{ garant.email }}</li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="#">Voir la fiche du garant</a></li>
-                            </ul>
+                    {% for garant in guarantorOf %}
+                        <div class="col-2 text-end">
+                            <a href="{{ path('guarantor.delete', {'id' : garant.id}) }}" class="btn btn-lg btn-outline-danger mt-3"><i class="fas fa-times"></i></a>
                         </div>
-                    </div>
-            {% endfor %}
+                        <div class="col-10 mt-3 text-start">
+                            <div class="btn-group">
+                                <button class="btn btn-secondary btn-lg" type="button">
+                                    {% if garant.firstname is defined and garant.lastname is defined and garant.firstname is not null and garant.lastname is not null %} {{ garant.firstname }} {{ garant.lastname }} {% else %} {{ garant.email }} {% endif %}
+                                </button>
+                                <button type="button" class="btn btn-lg btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    {% if garant.birth_date is defined and garant.birth_date is not null %}<li class="dropdown-item">{{ garant.birth_date }}</li>{% endif %}
+                                    <li class="dropdown-item">{{ garant.email }}</li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Voir la fiche du garant</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
         <div class="row">
             <div class="col-12">

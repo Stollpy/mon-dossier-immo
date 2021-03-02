@@ -27,6 +27,12 @@ class Invitation
      */
     private $email;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=InvitationCategory::class, inversedBy="invitation")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $invitationCategory;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -52,6 +58,18 @@ class Invitation
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getInvitationCategory(): ?InvitationCategory
+    {
+        return $this->invitationCategory;
+    }
+
+    public function setInvitationCategory(?InvitationCategory $invitationCategory): self
+    {
+        $this->invitationCategory = $invitationCategory;
 
         return $this;
     }

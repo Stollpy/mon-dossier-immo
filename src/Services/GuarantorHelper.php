@@ -26,17 +26,18 @@ class GuarantorHelper {
             $birthDate = $this->individualDataRepository->getDataByCode($garant, 'birth_date');
             $email = $garant->getUser()->getEmail();
 
-            $Data = [
-                'id' => $garant->getId(), 
-                'firstname' => $firstname->getData(), 
-                'lastname' => $lastname->getData(), 
-                'birth_date' => $birthDate->getData(),
-                'email' => $email
-            ];
+            $VerifDatas = [$lastname, $firstname, $birthDate];
+            $Data = ['id' => $garant->getId(), 'email' => $email];
+            foreach ($VerifDatas as $VerifData){
+                if($VerifData !== null){
+                    $Data[$VerifData->getProfilModelData()->getCode()] = $VerifData->getData();
+                }
+            }
 
             array_push($DataGarant, $Data);
         }
 
+        // dd($DataGarant);
         return $DataGarant;
     }
 
