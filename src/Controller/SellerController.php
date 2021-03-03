@@ -148,7 +148,7 @@ class SellerController extends AbstractController
           $this->addFlash('error', 'Vous devez précisez un code !');
           return $this->redirectToRoute('seller.directory_tenant_check_email', ['invitation' => $invitation]);
         }
-
+        
         $number = number_format($data['number'], 0, '', '');
         if($number == $code[0]){
           

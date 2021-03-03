@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Entity\User;
 use App\Entity\Individual;
 use App\Entity\Invitation;
 use App\Entity\IndividualData;
@@ -31,10 +32,10 @@ class IndividualDataService {
         $this->invitationCategoryRepository = $invitationCategoryRepository;
     }
 
-    public function CreateIndividual($user, $parentProfile){
+    public function CreateIndividual(User $user, $parentProfile){
         $profile = $this->profilesRepository->findOneBy(['code' => $parentProfile]);
         $profiles = $profile->getProfiles();
-
+        
         $individual = new Individual();
         $individual->setUser($user);
         foreach ($profiles as $profile){
@@ -43,7 +44,7 @@ class IndividualDataService {
         $this->manager->persist($individual); 
         $this->manager->flush();
 
-            // $this->CreateIndividualData($individual);
+        return $individual;
     }
 
     public function CreateIndividualData(Individual $individual)
@@ -64,13 +65,13 @@ class IndividualDataService {
         foreach ($parentProfiles as $profile){
             $code = $profile->getCode();
             $models = $this->profileModelDataRepository->getModelByProfil($code);
-
             foreach ($models as $model){
                 if(!in_array($model->getCode(), $codes)){
                     array_push($codes, $model->getCode());
                 }
             }
         }
+
         // Insert les données qu'un profiles a besoins 
         foreach ($codes as $code){
             $model = $this->profileModelDataRepository->findOneBy(['code' => $code]);
@@ -87,7 +88,7 @@ class IndividualDataService {
     public function insertIndividualData($individual, $form, $profile, $category)
     {
         $models = $this->profileModelDataRepository->getModelByProfilAndCategory($profile, $category);
-        
+
         foreach ($models as $model){
             $code = $model->getCode();
 
@@ -117,5 +118,24 @@ class IndividualDataService {
         $this->manager->flush();
 
         return $invitation;
+    }
+
+    /****************************************
+     *********** DATA FIXTURES **************
+     ****************************************/
+
+    public function createIndividualFixtures(User $user, $parentProfile){
+        $profiles = ['0' => 'tenant', '1' => 'seller'];
+        
+        $individual = new Individual();
+        $individual->setUser($user);
+        foreach ($profiles as $profile){
+            $child = $this->profilesRepository->findOneBy(['code' => $profile]);
+            $individual->addProfile($child);
+        }
+        $this->manager->persist($individual); 
+        $this->manager->flush();
+
+        return $individual;
     }
 }
