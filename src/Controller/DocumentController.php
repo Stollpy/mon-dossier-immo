@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\Document;
+use App\Security\Access;
 use App\Services\DocumentHelper;
 use App\Repository\DocumentRepository;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,9 +18,14 @@ class DocumentController extends AbstractController
        * @param User $user
        * @param DocumentRepository $documentRepository
        * @param IndividualDataCategoryRepository $individualDataCategory
+       * @param Access $access
        */
-      public function EditDocument(User $user, DocumentRepository $documentRepository, IndividualDataCategoryRepository $individualDataCategoryRepository)
+      public function EditDocument($id, Access $access, User $user, DocumentRepository $documentRepository, IndividualDataCategoryRepository $individualDataCategoryRepository)
       {
+        if($access->accessDashboard($id) !== true){
+            $this->addFlash('error', 'Access refuse !');
+            return $this->redirectToRoute('home.index');
+          }
             $individual = $user->getIndividual();
             
             $documents = [];

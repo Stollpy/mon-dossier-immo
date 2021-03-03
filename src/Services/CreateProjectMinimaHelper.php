@@ -162,6 +162,11 @@ class CreateProjectMinimaHelper {
                         '0' => 'firstname',
                         '1' => 'lastname',
                         '2' => 'birth_date',
+                        '3' => 'tel',
+                        '4' => 'address',
+                        '5' => 'city',
+                        '6' => 'postal_code',
+                        '7'  => 'country',
                     ],
                 ],
                 '1' => [
@@ -205,7 +210,31 @@ class CreateProjectMinimaHelper {
                 'code' => 'tel',
                 'type' => 'tel',
                 'category' => 'identity'
-            ]
+            ],
+            '4' => [
+                'label' => 'Adresse',
+                'code' => 'address',
+                'type' => 'text',
+                'category' => 'domiciliation',
+            ],
+            '5' => [
+                'label' => 'Ville',
+                'code' => 'city',
+                'type' => 'text',
+                'category' => 'domiciliation',
+            ],
+            '6' => [
+                'label' => 'Code postal',
+                'code' => 'postal_code',
+                'type' => 'number',
+                'category' => 'domiciliation',
+            ],
+            '7' => [
+                'label' => 'Pays',
+                'code' => 'country',
+                'type' => 'country',
+                'category' => 'domiciliation',
+            ],
         ];
     }
 

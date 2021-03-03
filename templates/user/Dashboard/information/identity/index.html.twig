@@ -3,6 +3,7 @@
 {% block title %}Dashboard - Mon identité{% endblock %}
 
 {% block functionality %}
+<style type="text/css" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css"></style>
 <div class="container-fluid">
     <div class="container">
         <div class="row">
@@ -11,35 +12,11 @@
                     <div class="col-12">
                         <h2>Formulaire d'identité</h2>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 mb-3">
                         {{ form_start(form) }}
                         {{ form_widget(form) }}
                         <input type="submit" class="btn btn-outline-primary mt-3" value="Modifier">
                         {{ form_end(form) }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <table class="table">
-                                <thead>
-                                    <tr>
-                                    <th scope="col">Vos informations personelles</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    {% for data in datas %}
-                                        <td>
-                                            {% if data.data is defined and data.data is not null %} 
-                                                Votre {{ data.profilModelData.label }}:  {{ data.data }}
-                                            {% else %}
-                                                Vous n'avez pas préciser votre {{ data.profilModelData.label }}
-                                            {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
@@ -67,6 +44,59 @@
                 </div>
                 {% endif %}
             </div>
+            {% if formDomiciliation is defined and formDomiciliationUpload is defined %}
+            <div class="col-12 mt-3">
+                <div class="row">
+                    <div class="col-6 shadow-sm">
+                        <div class="col-12">
+                            <h2>Formulaire de domiciliation</h2>
+                        </div>
+                        <div class="col-12">
+                            {{ form_start(formDomiciliation) }}
+                            {{ form_widget(formDomiciliation) }}
+                            <input type="submit" class="btn btn-outline-primary mt-3" value="Modifier">
+                            {{ form_end(formDomiciliation) }}
+                        </div>
+                    </div>
+                    <div class="col-6 shadow-sm">
+                        <div class="col-12">
+                            <h2>Document de domiciliation</h2>
+                        </div>
+                        <div class="col-12">
+                            {{ form_start(formDomiciliationUpload) }}
+                            {{ form_widget(formDomiciliationUpload) }}
+                            <input type="submit" class="btn btn-outline-primary mt-3" value="Uploader">
+                            {{ form_end(formDomiciliationUpload) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="col-12 mt-3">
+                <div class="row">
+                    <div class="col-12 shadow-sm">
+                        <table class="table">
+                                <thead>
+                                    <h4>Vos informations personelles</h4>
+                                </thead>
+                                 <hr class="dropdown-divider">
+                            <tbody>
+                                <tr>
+                                    {% for data in datas %}
+                                        <td>
+                                            {% if data.data is defined and data.data is not null %} 
+                                                Votre {{ data.profilModelData.label }}:  {{ data.data }}
+                                            {% else %}
+                                                Vous n'avez pas préciser votre {{ data.profilModelData.label }}
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -92,4 +122,6 @@
                 </div>
             </div>
 {% endif %}
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 {% endblock %}

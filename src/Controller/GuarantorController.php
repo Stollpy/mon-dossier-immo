@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Security\Access;
 use App\Services\MailService;
 use App\Form\CreateGarantType;
 use App\Form\CheckDirectoryType;
@@ -26,12 +27,17 @@ class GuarantorController extends AbstractController
 {
     /**
      * @Route("mes-garants/{id}", name="user.garant", methods={"GET"})
+     * @param int $id
      * @param IndividualRepository $individualRepository
      * @param GuarantorHelper $guarantorHelper
+     * @param Access $access
      */
-    public function EditGuarant($id, IndividualRepository $individualRepository, GuarantorHelper $guarantorHelper)
+    public function EditGuarant($id, Access $access, IndividualRepository $individualRepository, GuarantorHelper $guarantorHelper)
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        if($access->accessDashboard($id) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
         $formGarant = $this->createForm(CreateGarantType::class, null, ['action' => $this->generateUrl('guarantor.create-invitation', ['id' => $this->getUser()->getId()]), 'method' => 'POST']);
         
         $individual = $individualRepository->findOneByIdUser($id);
@@ -54,9 +60,15 @@ class GuarantorController extends AbstractController
     * @param Request $request
     * @param MailService $mailService
     * @param IndividualDataService $dataService
+    * @param Access $access
     */
-    public function createGarant($id, Request $request, MailService $mailService, IndividualDataService $dataService)
+    public function createGarant($id, Access $access, Request $request, MailService $mailService, IndividualDataService $dataService)
     {
+        if($access->accessDashboard($id) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
+
         $data = $request->get('create_garant');
 
         $invitation = $dataService->InvitationCreate($data['email'], $this->getUser()->getIndividual(), 'guarantor');
@@ -77,7 +89,6 @@ class GuarantorController extends AbstractController
     */
     public function deleteGarant($id, IndividualRepository $individualRepository, EntityManagerInterface $manager)
     {
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $individual = $individualRepository->findOneByUser($this->getUser());
         $garant = $individualRepository->findOneBy(['id' => $id]);
@@ -131,6 +142,7 @@ class GuarantorController extends AbstractController
      */
     public function checkCodeGuarantor($invitation, Request $request, SessionInterface $session, TokenGeneratorInterface $tokenInterface)
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         $data = $request->get('check_directory');
         $code = $session->get('ValidCodeGarant');
 

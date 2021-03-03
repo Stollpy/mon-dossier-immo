@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\IncomeType;
+use App\Security\Access;
 use App\Form\DocumentType;
 use App\Services\IncomeHelper;
 use App\Services\UploadFilesHelper;
@@ -19,13 +20,18 @@ class IncomeController extends AbstractController
 {
      /**
      * @Route("mes-revenues/{id}", name="income.edit", methods={"GET"})
+     * @param int $id
      * @param IncomeTypeRepository $IncomeTypeRepository
      * @param IncomeYearRepository $incomeRepository
      * @param IncomeHelper $incomeHelper
+     * @param Access $access
      */
-    public function EditIcomes(IncomeTypeRepository $IncomeTypeRepository, IncomeYearRepository $incomeYearRepository, IncomeHelper $incomeHelper)
+    public function EditIcomes($id, Access $access, IncomeTypeRepository $IncomeTypeRepository, IncomeYearRepository $incomeYearRepository, IncomeHelper $incomeHelper)
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
+        if($access->accessDashboard($id) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
         
         $IncomeType = $IncomeTypeRepository->findAll();
         $typeCode = $incomeHelper->IncomeTypeForm($IncomeType);
@@ -49,12 +55,17 @@ class IncomeController extends AbstractController
 
     /**
      * @Route("mes-revenues/{id}", name="income.create", methods={"POST"})
+     * @param int $id
      * @param Request $request
      * @param IncomeHelper $incomeHelper
+     * @param Access $access
      */
-    public function AddIcomes($id, Request $request, IncomeHelper $incomeHelper)
+    public function AddIcomes($id, Access $access, Request $request, IncomeHelper $incomeHelper)
     {
-       $this->denyAccessUnlessGranted('ROLE_USER');
+        if($access->accessDashboard($id) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
 
        $individual = $this->getUser()->getIndividual();
        $data = $request->get('income');
@@ -66,15 +77,22 @@ class IncomeController extends AbstractController
 
     /**
      * @Route("mes-revenues/{id}/{code}/upload", name="income.upload_year", methods={"POST"})
+     * @param int $id
      * @param string $code
      * @param Request $request
      * @param IndividualDataCategoryRepository $categoryRepository
      * @param  ProfilesRepository $profileRepository
      * @param UploadFilesHelper $uploadFilesHelper
      * @param IncomeYearRepository $incomeYearRepository
+     * @param Access $access
      */
-    public function uploadDocIncomeYear($code, Request $request, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository, UploadFilesHelper $uploadFilesHelper, IncomeYearRepository $incomeYearRepository)
+    public function uploadDocIncomeYear($id, $code, Access $access, Request $request, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository, UploadFilesHelper $uploadFilesHelper, IncomeYearRepository $incomeYearRepository)
     {
+        if($access->accessDashboard($id) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
+
         $individual = $this->getUser()->getIndividual();
         $file = $request->files->get('document');
         $label = $request->get('document');
@@ -99,15 +117,22 @@ class IncomeController extends AbstractController
 
     /**
      * @Route("mes-revenues/{id}/upload/{income}", name="income.upload", methods={"POST"})
+     * @param int $id
      * @param int $income
      * @param Request $request
      * @param IndividualDataCategoryRepository $categoryRepository
      * @param  ProfilesRepository $profileRepository
      * @param UploadFilesHelper $uploadFilesHelper
      * @param IncomeRepository $incomeRepository
+     * @param Access $access
      */
-    public function uploadDocIncome($income, Request $request, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository, UploadFilesHelper $uploadFilesHelper, IncomeRepository $incomeRepository)
+    public function uploadDocIncome($id, $income, Access $access, Request $request, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository, UploadFilesHelper $uploadFilesHelper, IncomeRepository $incomeRepository)
     {
+        if($access->accessDashboard($id) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
+
         // dd($request->files->get('document'));
         $individual = $this->getUser()->getIndividual();
 

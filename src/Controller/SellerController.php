@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Security\Access;
 use App\Entity\Individual;
 use App\Form\DocumentType;
 use App\Form\IdentityType;
@@ -25,13 +26,19 @@ class SellerController extends AbstractController
 {
      /**
       * @Route("mes-informations-vendeur/{id}", name="seller.edit")
+      * @param int $id
       * @param Request $request
       * @param IndividualDataService $individualDataService
       * @param IndividualDataRepository $individualDataRepository
+      * @param Access $access
       * @param User $user
       */
-      public function EditInformationsSeller(Request $request, User $user, IndividualDataService $individualDataService, IndividualDataRepository $individualDataRepository)
+      public function EditInformationsSeller($id, Access $access, Request $request, User $user, IndividualDataService $individualDataService, IndividualDataRepository $individualDataRepository)
       {
+        if($access->accessDashboard($id) !== true){
+          $this->addFlash('error', 'Access refuse !');
+          return $this->redirectToRoute('home.index');
+        }
           $individual = $user->getIndividual();
 
           $datas = $individualDataRepository->getDataByIndividualAndProfile($individual, 'seller');
@@ -62,15 +69,20 @@ class SellerController extends AbstractController
 
       /**
        * @Route("mes-informations-vendeur/{id}/upload", name="seller.upload", methods={"POST"})
+       * @param int $id
        * @param Request $request
        * @param UploadFilesHelper $uploadFilesHelper
        * @param User $user
        * @param IndividualDataCategoryRepository $categroyRepository
        * @param ProfilesRepository $profileRepository
+       * @param Access $access
        */
-      public function sellerUplodadDocument(Request $request, User $user, UploadFilesHelper $uploadFilesHelper, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository)
+      public function sellerUplodadDocument($id, Access $access, Request $request, User $user, UploadFilesHelper $uploadFilesHelper, IndividualDataCategoryRepository $categoryRepository, ProfilesRepository $profileRepository)
       {
-
+        if($access->accessDashboard($id) !== true){
+          $this->addFlash('error', 'Access refuse !');
+          return $this->redirectToRoute('home.index');
+        }
         $individual = $user->getIndividual();
 
         // Récupération du document
@@ -86,7 +98,7 @@ class SellerController extends AbstractController
 
         $id = $user->getId();
 
-        $violations = $uploadFilesHelper->FileValidator($file['data']);
+        $violations = $uploadFilesHelper->FileValidator($file);
         if($violations->count() > 0){
             $violations = $violations[0];
             $this->addFlash('error', $violations->getMessage());

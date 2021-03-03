@@ -11,6 +11,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\CountryType;
 
 class IdentityType extends AbstractType
 {
@@ -28,6 +30,8 @@ class IdentityType extends AbstractType
             "text" => TextType::class,
             "date" => DateType::class,
             "tel" => TelType::class,
+            'number' => NumberType::class,
+            'country' => CountryType::class,
         ];
             
             $models = $this->profilModelData->getModelByProfilAndCategory($options['data_profile'], $options["data_category"]);

@@ -88,18 +88,30 @@ class IndividualDataService {
     public function insertIndividualData($individual, $form, $profile, $category)
     {
         $models = $this->profileModelDataRepository->getModelByProfilAndCategory($profile, $category);
-
+        
         foreach ($models as $model){
             $code = $model->getCode();
 
-            if($code !== 'birth_date'){
-                $data = $this->individualDataRepository->getDataByCode($individual, $code);
-                $data->setData($form->get($code)->getData());
-                $this->manager->persist($data);
+            if(!is_array($form)){
+                if($code !== 'birth_date'){
+                    $data = $this->individualDataRepository->getDataByCode($individual, $code);
+                    $data->setData($form->get($code)->getData());
+                    $this->manager->persist($data);
+                }else{
+                    $data = $this->individualDataRepository->getDataByCode($individual, $code);
+                    $data->setData(date_format($form->get($code)->getData(), 'Y-m-d'));
+                    $this->manager->persist($data);
+                }
             }else{
-                $data = $this->individualDataRepository->getDataByCode($individual, $code);
-                $data->setData(date_format($form->get($code)->getData(), 'Y-m-d'));
-                $this->manager->persist($data);
+                if($code !== 'birth_date'){
+                    $data = $this->individualDataRepository->getDataByCode($individual, $code);
+                    $data->setData($form[$code]);
+                    $this->manager->persist($data);
+                }else{
+                    $data = $this->individualDataRepository->getDataByCode($individual, $code);
+                    $data->setData(date_format($form[$code], 'Y-m-d'));
+                    $this->manager->persist($data);
+                }
             }
         }
 

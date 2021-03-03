@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\UserType;
+use App\Security\Access;
 use App\Form\EditUserType;
 use App\Services\MailService;
 use App\Form\EditUserPasswordType;
@@ -212,11 +213,15 @@ class UserController extends AbstractController
      * @param User $user
      * @param Request $request
      * @param EntityManagerInterface $manager
+     * @param Access $access
      */
 
-    public function edit(User $user, Request $request, EntityManagerInterface $manager)
+    public function edit(Access $access, User $user, Request $request, EntityManagerInterface $manager)
     {
-        $this->denyAccessUnlessGranted('ROLE_USER');
+        if($access->accessDashboard($user->getId()) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
 
         $form = $this->createForm(EditUserType::class, $user);
         $form->handleRequest($request);
@@ -245,11 +250,15 @@ class UserController extends AbstractController
      * @param Request $request
      * @param UserEncoderInterface $encoder
      * @param EntityManagerInterface $manager
+     * @param Access $access
      */
     
-     public function editPassword(User $user, Request $request, UserPasswordEncoderInterface $encoder, EntityManagerInterface $manager)
+     public function editPassword(Access $access, User $user, Request $request, UserPasswordEncoderInterface $encoder, EntityManagerInterface $manager)
      {
-        $this->denyAccessUnlessGranted('ROLE_USER');
+        if($access->accessDashboard($user->getId()) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
 
         $form =  $this->createForm(EditUserPasswordType::class);
         $form->handleRequest($request);
@@ -281,10 +290,14 @@ class UserController extends AbstractController
      * @Route("user/dashboard/{id}/remove", name="user.remove")
      * @param User $user
      * @param EntityManagerInterface $manager
+     * @param Access $access
      */
-     public function remove(User $user, EntityManagerInterface $manager)
+     public function remove(Access $access, User $user, EntityManagerInterface $manager)
      {
-        $this->denyAccessUnlessGranted('ROLE_USER');
+        if($access->accessDashboard($user->getId()) !== true){
+            $this->addFlash('error', 'Access denied !');
+            return $this->redirectToRoute('home.index');
+          }
 
         $manager->remove($user);
         $manager->flush();
