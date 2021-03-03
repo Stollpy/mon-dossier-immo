@@ -26,4 +26,4 @@
          cette commande vous permettra de créer le project de version minima sans avoir de contenu de test.
       
       2. Démarrer les fixtures `symfony console doctrine:fixtures:load` ! Une recette de fixtures est préparer 
-         en lanceant le projet minima avec les donners de test.
+         en lanceant le projet minima avec les données de test.
