@@ -8,7 +8,7 @@
 
 2. Creer le fichier .env.local et ecrire : 
     - la configuration de BDD ( MySql )
-    - ainsi que celle pour mailer ( utilisation d'un serveur smtp ou autre MailTrap par exemple )
+    - la configuration pour mailer ( utilisation d'un serveur smtp ou autre MailTrap par exemple )
     - l'auhtentification via réseaux sociaux. ( clé API Google )
     - Indiquer dans la constanste `SITE_BASE_URL` l'url de base ( ex : localhost:8000 )
 
