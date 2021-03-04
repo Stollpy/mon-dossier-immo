@@ -37,6 +37,24 @@ class DocumentRepository extends ServiceEntityRepository
         ;
     }
 
+        /**
+     * @return Document[] Returns an array of Document objects
+     */
+
+    public function findByCategoryAndIndividual($category, $individual)
+    {
+        return $this->createQueryBuilder('d')
+            ->andWhere('d.category = :category')
+            ->setParameter('category', $category)
+
+            ->andWhere('d.individual = :individual')
+            ->setParameter('individual', $individual)
+
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
 
     /*
     public function findOneBySomeField($value): ?Document

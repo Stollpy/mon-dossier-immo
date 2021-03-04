@@ -19,22 +19,25 @@ class IndividualDataCategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, IndividualDataCategory::class);
     }
 
-    // /**
-    //  * @return IndividualDataCategory[] Returns an array of IndividualDataCategory objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @return IndividualDataCategory[] Returns an array of IndividualDataCategory objects
+     */
+    
+    public function profileParentAndChild($profile)
     {
         return $this->createQueryBuilder('i')
-            ->andWhere('i.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('i.id', 'ASC')
-            ->setMaxResults(10)
+            ->innerJoin('i.ProfilModelData', 'modelData')
+            ->addSelect('modelData')
+
+            ->innerJoin('modelData.profiles', 'profile')
+            ->andWhere('profile.code = :profile')
+            ->setParameter('profile', $profile)
+
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+    
 
     /*
     public function findOneBySomeField($value): ?IndividualDataCategory

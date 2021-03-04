@@ -7,6 +7,7 @@ use App\Security\Access;
 use App\Form\DocumentType;
 use App\Form\IdentityType;
 use App\Form\InvitationType;
+use App\Services\ChartHelper;
 use App\Services\MailService;
 use App\Services\UploadFilesHelper;
 use App\Repository\ProfilesRepository;
@@ -26,8 +27,9 @@ class TenantController extends AbstractController
       * @param IndividualDataRepository $individualDataRepository
       * @param User $user
       * @param Access $access
+      * @param ChartHelper $chart
       */
-      public function EditInformations(Access $access, Request $request, User $user, IndividualDataService $individualDataService, IndividualDataRepository $individualDataRepository)
+      public function EditInformations(ChartHelper $chart, Access $access, Request $request, User $user, IndividualDataService $individualDataService, IndividualDataRepository $individualDataRepository)
       {
         if($access->accessDashboard($user->getId()) !== true){
           $this->addFlash('error', 'Access refuse !');
@@ -54,7 +56,10 @@ class TenantController extends AbstractController
           
           $formDomiciliation = $this->createForm(IdentityType::class, null, ['action' => $this->generateUrl('tenant.domiciliation', ['id' => $user->getId()]),'data_profile' => 'tenant', 'data_category' => 'domiciliation', 'method' => 'POST']);
           $formDomiciliationUpload = $this->createForm(DocumentType::class, null, ['data_label' => 'label', 'action' => $this->generateUrl('tenant.domiciliation-upload', ['id' => $user->getId()]), 'method' => 'POST']);
-          
+         
+          $chartDirectory = $chart->smallChartCalculated($individual, 'tenant');
+          $chartIncome = $chart->smallCharteIncome($individual);
+
           return $this->render('user/Dashboard/information/identity/index.html.twig', [
             'form' => $form->createView(),
             'datas' => $datas,
@@ -62,6 +67,8 @@ class TenantController extends AbstractController
             'formInvitation' => $formInvitation->createView(),
             'formDomiciliationUpload' => $formDomiciliationUpload->createView(),
             'formDomiciliation' => $formDomiciliation->createView(),
+            'chartDirectory' => $chartDirectory,
+            'chartIncome' => $chartIncome['incomes'],
           ]);
       }
 
