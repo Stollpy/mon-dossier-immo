@@ -1,0 +1,41 @@
+{% extends "user/Dashboard/information/base.html.twig" %}
+{% block functionality %}
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="row">
+                            <div class="col-12">
+                                <h4>Mes annonces</h4>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                            {% for item in ads %}
+                            <div class="card shadow-sm" style="width: 18rem;">
+                                <img src="/assets/images/upload/villa.jpg" class="card-img-top" alt="Villa">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ item.titre }}</h5>
+                                    <p class="card-text">{{ item.content }}</p>
+                                    <a href="#" class="btn btn-outline-primary">Re éditer cette annonce</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4 shadow rounded">
+                        <h4 class="mt-3">Ajouter une annonces</h4>
+                        {{ form_start(form) }}
+                        {{ form_widget(form) }}
+                        <input type="submit" class="btn btn-outline-primary mt-3 mb-3" value="Créer">
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -32,7 +32,7 @@ class ChartHelper {
      * @param array $options
      * @return void
      */
-    public function smallChartCalculated(Individual $individual, string $profile, array $options = [])
+    public function smallChartCalculated(Individual $individual, string $profile)
     {
         $data = [];
         $dataCategory = $this->dataCategoryRepository->profileParentAndChild($profile);

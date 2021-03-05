@@ -9,7 +9,40 @@
                 <div class="col-12">
                     <h1>Bienvenue sur la page d'acceuil</h1>
                 </div>
+                <div class="row" id="displayAds">
+                    
+                </div>
             </div>
         </div>
     </div>
+{% endblock %}
+{% block javascripts %}
+<script>
+    var display = document.getElementById('displayAds');
+    fetch('/api/ads')
+    .then(function(response) {
+        if(response.status !== 200) {
+            console.log('Problème de status' + response.status)
+            return;
+        }else{
+            response.json().then(function(data){
+                data['hydra:member'].forEach(function(ads){
+                    display.innerHTML += '<div class="col-sm-6 col-md-4">\n'
+                        +'<div class="card" style="width: 18rem;">\n'
+                            +'<img src="/assets/images/upload/villa.jpg" alt="Villa" class="card-img-top">\n'
+                            +'<div class="card-body">\n'
+                                +'<h5 class="card-title">'+ ads.titre +'</h5>\n'
+                                +'<p class="card-text">'+ ads.content +'</p>\n'
+                                +'<a href="'+ads.id+'" class="btn btn-outline-primary">Voir l\'annonce</a>'
+                            +'</div>'
+                        +'</div>\n'
+                    +'</div>'
+                })
+            })
+        }
+    })
+    .catch(function(error) {
+        console.log('Erreur de fetch :' + error);
+    });
+</script>
 {% endblock %}

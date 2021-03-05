@@ -60,7 +60,7 @@ class TenantController extends AbstractController
           $chartDirectory = $chart->smallChartCalculated($individual, 'tenant');
           $chartIncome = $chart->smallCharteIncome($individual);
 
-          return $this->render('user/Dashboard/information/identity/index.html.twig', [
+          return $this->render('user/Dashboard/information/identity/tenant/index.html.twig', [
             'form' => $form->createView(),
             'datas' => $datas,
             'formDoc' => $formDoc->createView(),

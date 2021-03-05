@@ -2,18 +2,22 @@
 
 namespace App\Controller;
 
+use App\Entity\Ads;
 use App\Entity\User;
+use App\Form\AdsType;
 use App\Security\Access;
 use App\Entity\Individual;
 use App\Form\DocumentType;
 use App\Form\IdentityType;
 use App\Services\MailService;
 use App\Form\CheckDirectoryType;
+use App\Repository\AdsRepository;
 use App\Services\UploadFilesHelper;
 use App\Repository\DocumentRepository;
 use App\Repository\ProfilesRepository;
 use App\Services\IndividualDataService;
 use App\Repository\InvitationRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\IndividualDataRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -59,7 +63,7 @@ class SellerController extends AbstractController
 
           $formDoc = $this->createForm(DocumentType::class, null, ['data_label' => 'label', 'action' => $this->generateUrl('seller.upload', ['id' => $user->getId()]), 'method' => 'POST']);
 
-          return $this->render('user/Dashboard/information/identity/index.html.twig', [
+          return $this->render('user/Dashboard/information/identity/seller/index.html.twig', [
             'form' => $form->createView(),
             'datas' => $datas,
             'formDoc' => $formDoc->createView(),
@@ -200,4 +204,44 @@ class SellerController extends AbstractController
         $this->addFlash('error', 'Vous n\'êtiez pas autorisé à être sur cette page.');
         return $this->redirectToRoute('home.index');
       }
+      
+    /**
+     * @Route("/mes-annonces/{id}", name="seller.ads")
+     * @param int $id
+     * @param Access $access
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @param AdsRepository $adsRepository
+     */
+    public function displayAds($id, EntityManagerInterface $manager, Request $request, AdsRepository $adsRepository, Access $access)
+    {
+      if($access->accessDashboard($id) !== true){
+        $this->addFlash('error', 'Access refuse !');
+        return $this->redirectToRoute('home.index');
+      }
+
+      $individual = $this->getUser()->getIndividual();
+      $adsIndividual = $adsRepository->findBy(['individual' => $individual]);
+
+      $form = $this->createForm(AdsType::class, null, []);
+      $form->handleRequest($request);
+
+      if($form->isSubmitted() && $form->isValid()){     
+
+        $ads = new Ads();
+        $ads->setTitre($form->get('titre')->getData());
+        $ads->setContent($form->get('content')->getData());
+        $ads->setIndividual($individual);
+
+        $manager->persist($ads);
+        $manager->flush();
+        $this->addFlash('success', 'Votre annonce à bien été publié !');
+        return $this->redirectToRoute('seller.ads', ['id' => $id]);
+      }
+
+      return $this->render('user/Dashboard/information/Ads/index.html.twig', [
+        'form' => $form->createView(),
+        'ads' => $adsIndividual,
+      ]);
+    }
 }

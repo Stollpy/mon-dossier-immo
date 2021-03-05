@@ -65,6 +65,11 @@ class Individual
      */
     private $incomeYears;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Ads::class, mappedBy="individual")
+     */
+    private $ads;
+
     public function __construct()
     {
         $this->individualData = new ArrayCollection();
@@ -75,6 +80,7 @@ class Individual
         $this->invitations = new ArrayCollection();
         $this->incomes = new ArrayCollection();
         $this->incomeYears = new ArrayCollection();
+        $this->ads = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -313,6 +319,36 @@ class Individual
             // set the owning side to null (unless already changed)
             if ($incomeYear->getIndividual() === $this) {
                 $incomeYear->setIndividual(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Ads[]
+     */
+    public function getAds(): Collection
+    {
+        return $this->ads;
+    }
+
+    public function addAd(Ads $ad): self
+    {
+        if (!$this->ads->contains($ad)) {
+            $this->ads[] = $ad;
+            $ad->setIndividual($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAd(Ads $ad): self
+    {
+        if ($this->ads->removeElement($ad)) {
+            // set the owning side to null (unless already changed)
+            if ($ad->getIndividual() === $this) {
+                $ad->setIndividual(null);
             }
         }
 
