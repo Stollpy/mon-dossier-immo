@@ -109,7 +109,7 @@ class IncomeController extends AbstractController
         
         $year = $incomeYearRepository->findOneByCodeAndIndividual($code, $individual);
 
-        $uploadFilesHelper->uploadFilePrivate($file['data'], $label['label'], $individual, $category, $profile, null, $year);
+        $uploadFilesHelper->uploadDocPrivate($file['data'], $label['label'], $individual, $category, $profile, null, $year);
 
         $this->addFlash('success', 'Votre revenue pour l\'année '.$code.' à bien été téléchargé.');
         return $this->redirectToRoute('income.edit', ['id' => $this->getUser()->getId()]);
@@ -152,7 +152,7 @@ class IncomeController extends AbstractController
         
         $incomeData = $incomeRepository->findOneBy(['id' => $income]);
 
-        $uploadFilesHelper->uploadFilePrivate($file['data'], $incomeData->getLabel(), $individual, $category, $profile, $incomeData, null);
+        $uploadFilesHelper->uploadDocPrivate($file['data'], $incomeData->getLabel(), $individual, $category, $profile, $incomeData, null);
 
         $this->addFlash('success', 'Votre document associé au revenue '.$incomeData->getLabel().' à bien été téléchargé.');
         return $this->redirectToRoute('income.edit', ['id' => $this->getUser()->getId()]);

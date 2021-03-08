@@ -6,7 +6,10 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class AdsType extends AbstractType
@@ -14,8 +17,28 @@ class AdsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('titre', TextType::class, [
+            ->add('title', TextType::class, [
                 'label' => 'Le titre de votre annonces',
+                'required' => true,
+                'attr' => ['class' =>'form-control'],
+                'constraints' => [
+                    new NotBlank()
+                ],
+            ])
+            ->add('category', ChoiceType::class, [
+                'label' => 'Type d\'annonce',
+                'choices' => [
+                    'À louez' => 'rental',
+                    'À vendre' => 'sale'
+                ],
+                'required' => true,
+                'attr' => ['class' =>'form-control'],
+                'constraints' => [
+                    new NotBlank()
+                ],
+            ])
+            ->add('price', NumberType::class, [
+                'label' => 'Le prix ( en € )',
                 'required' => true,
                 'attr' => ['class' =>'form-control'],
                 'constraints' => [
@@ -28,6 +51,12 @@ class AdsType extends AbstractType
                 'constraints' => [
                     new NotBlank()
                 ],
+            ])
+            ->add('pictures', FileType::class, [
+                'label' => 'Vos images',
+                'attr' => ['class' => 'form-control'],
+                'required' => false,
+                'multiple' => true,
             ])
         ;
     }

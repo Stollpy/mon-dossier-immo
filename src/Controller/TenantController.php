@@ -135,7 +135,7 @@ class TenantController extends AbstractController
             return $this->redirectToRoute('seller.edit', ['id' => $id]);
         }
         
-        $uploadFilesHelper->uploadFilePrivate($file['data'], $label['label'], $individual, $category, $profile);
+        $uploadFilesHelper->uploadDocPrivate($file['data'], $label['label'], $individual, $category, $profile);
 
         $this->addFlash('success', 'Votre documents à bien été téléchargé ! Vous pouvez le retouver dans votre rubrique "Mes documents".');
         return $this->redirectToRoute('document.edit', ['id' => $id]);
@@ -195,7 +195,7 @@ class TenantController extends AbstractController
             return $this->redirectToRoute('seller.edit', ['id' => $id]);
         }
   
-        $uploadFilesHelper->uploadFilePrivate($file['data'], $label['label'], $individual, $category, $profile);
+        $uploadFilesHelper->uploadDocPrivate($file['data'], $label['label'], $individual, $category, $profile);
 
         $this->addFlash('success', 'Votre documents à bien été téléchargé ! Vous pouvez le retouver dans votre rubrique "Mes documents".');
         return $this->redirectToRoute('document.edit', ['id' => $id]);

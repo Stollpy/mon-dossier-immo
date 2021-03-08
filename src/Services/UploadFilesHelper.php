@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Entity\Ads;
 use App\Entity\Income;
 use App\Entity\Document;
 use App\Entity\Profiles;
 use App\Entity\IncomeYear;
 use App\Entity\Individual;
+use App\Entity\AdsPictures;
 use App\Entity\IndividualDataCategory;
 use Doctrine\ORM\EntityManagerInterface;
 use League\Flysystem\FilesystemInterface;
@@ -18,32 +20,35 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UploadFilesHelper{
 
-    const UPLOAD_REFERENCE = 'Private_Document';
+    const UPLOAD_REFERENCE_PRIVATE = 'Private_Document';
+    const UPLOAD_REFERENCE_PUBLIC = '';
 
     private $slugger;
     private $manager;
     private $privateFilesystem;
+    private $publicFileSystem;
     private $validator;
 
-    public function __construct(SluggerInterface $slugger, EntityManagerInterface $manager, FilesystemInterface $privateUploadsFilesystem, ValidatorInterface $validator)
+    public function __construct(SluggerInterface $slugger, EntityManagerInterface $manager, FilesystemInterface $privateUploadsFilesystem, FilesystemInterface $publicUploadsFilesystem, ValidatorInterface $validator)
     {
         $this->slugger = $slugger;
         $this->manager = $manager;
         $this->privateFilesystem = $privateUploadsFilesystem; 
+        $this->publicFileSystem = $publicUploadsFilesystem;
         $this->validator = $validator;
     }
 
     /**
-     * uploadFilePublic function
+     * uploadDocPublic function
      *
      * @param UploadedFile $file
      * @param Individual $individual
      * @param string $label
      * @param IndividualDataCategory $category
      */
-    public function uploadFilePublic(UploadedFile $file, Individual $individual, string $label, IndividualDataCategory $category)
+    public function uploadDocPublic(UploadedFile $file, Individual $individual, string $label, IndividualDataCategory $category)
     {
-        $fileName = $this->uploadFileGeneric($file, self::UPLOAD_REFERENCE);
+        $fileName = $this->uploadDocGeneric($file, self::UPLOAD_REFERENCE_PUBLIC);
 
         $document = new Document();
         $document->setData($fileName);
@@ -56,7 +61,7 @@ class UploadFilesHelper{
     }
 
     /**
-     * uploadFilePrivate function
+     * uploadDocPrivate function
      *
      * @param UploadedFile $file
      * @param string $label
@@ -66,9 +71,9 @@ class UploadFilesHelper{
      * @param Income $income
      * @param IncomeYear $years
      */
-    public function uploadFilePrivate(UploadedFile $file, string $label, Individual $individual, IndividualDataCategory $category, Profiles $profile = null, Income $income = null, IncomeYear $years = null)
+    public function uploadDocPrivate(UploadedFile $file, string $label, Individual $individual, IndividualDataCategory $category, Profiles $profile = null, Income $income = null, IncomeYear $years = null)
     {
-        $fileName = $this->uploadFileGeneric($file, self::UPLOAD_REFERENCE, false);
+        $fileName = $this->uploadDocGeneric($file, self::UPLOAD_REFERENCE_PRIVATE, false);
 
         $document = new Document();
         $document->setData($fileName);
@@ -86,13 +91,13 @@ class UploadFilesHelper{
     }
 
     /**
-     * uploadFileGeneric function
+     * uploadDocGeneric function
      *
      * @param UploadedFile $file
      * @param string $directory
      * @param boolean $isPublic
      */
-    private function uploadFileGeneric(UploadedFile $file, string $directory, bool $isPublic = true )
+    private function uploadDocGeneric(UploadedFile $file, string $directory, bool $isPublic = true )
     {
         if( $file instanceof UploadedFile){
             $originalFilename = $file->getClientOriginalName();
@@ -172,5 +177,26 @@ class UploadFilesHelper{
         ]);
         
         return $violations;
+    }
+
+     /**
+     * uploadDocPrivate function
+     *
+     * @param Ads $ads
+     */
+    public function uploadPicturesAdsPublic($files, Ads $ads)
+    {
+        foreach ($files as $file){
+            $fileName = $this->uploadDocGeneric($file, self::UPLOAD_REFERENCE_PUBLIC);
+
+            $adsPicture = new AdsPictures();
+            $adsPicture->setData($fileName);
+            $adsPicture->setMimeType($file->guessExtension());
+            $adsPicture->setAds($ads);
+            $this->manager->persist($adsPicture);
+        }
+
+        $this->manager->flush();
+
     }
 }

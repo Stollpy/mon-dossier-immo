@@ -9,6 +9,7 @@ use App\Security\Access;
 use App\Entity\Individual;
 use App\Form\DocumentType;
 use App\Form\IdentityType;
+use App\Entity\AdsPictures;
 use App\Services\MailService;
 use App\Form\CheckDirectoryType;
 use App\Repository\AdsRepository;
@@ -18,6 +19,7 @@ use App\Repository\ProfilesRepository;
 use App\Services\IndividualDataService;
 use App\Repository\InvitationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\AdsCategoryRepository;
 use App\Repository\IndividualDataRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -109,7 +111,7 @@ class SellerController extends AbstractController
             return $this->redirectToRoute('seller.edit', ['id' => $id]);
         }
         
-        $uploadFilesHelper->uploadFilePrivate($file, $label, $individual, $category, $profile);
+        $uploadFilesHelper->uploadDocPrivate($file, $label, $individual, $category, $profile);
 
         $this->addFlash('success', 'Votre documents à bien été téléchargé ! Vous pouvez le retouver dans votre rubrique "Mes documents".');
         return $this->redirectToRoute('document.edit', ['id' => $id]);
@@ -212,8 +214,10 @@ class SellerController extends AbstractController
      * @param Request $request
      * @param EntityManagerInterface $manager
      * @param AdsRepository $adsRepository
+     * @param AdsCategoryRepository $adsCategoryRepository
+     * @param UploadFilesHelper $uploadFilesHelper
      */
-    public function displayAds($id, EntityManagerInterface $manager, Request $request, AdsRepository $adsRepository, Access $access)
+    public function displayAds($id, EntityManagerInterface $manager, Request $request, AdsRepository $adsRepository, Access $access, AdsCategoryRepository $adsCategoryRepository, UploadFilesHelper $uploadFilesHelper)
     {
       if($access->accessDashboard($id) !== true){
         $this->addFlash('error', 'Access refuse !');
@@ -226,14 +230,19 @@ class SellerController extends AbstractController
       $form = $this->createForm(AdsType::class, null, []);
       $form->handleRequest($request);
 
-      if($form->isSubmitted() && $form->isValid()){     
+      if($form->isSubmitted() && $form->isValid()){
+        $category = $adsCategoryRepository->findOneBy(['code' => $form->get('category')->getData()]);
 
         $ads = new Ads();
-        $ads->setTitre($form->get('titre')->getData());
+        $ads->setTitle($form->get('title')->getData());
+        $ads->setAdsCategory($category);
+        $ads->setPrice(str_replace(',', '.', $form->get('price')->getData()));
         $ads->setContent($form->get('content')->getData());
         $ads->setIndividual($individual);
-
         $manager->persist($ads);
+        
+        $uploadFilesHelper->uploadPicturesAdsPublic($form->get('pictures')->getData(), $ads);
+
         $manager->flush();
         $this->addFlash('success', 'Votre annonce à bien été publié !');
         return $this->redirectToRoute('seller.ads', ['id' => $id]);
