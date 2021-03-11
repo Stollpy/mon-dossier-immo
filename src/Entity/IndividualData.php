@@ -3,9 +3,20 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\IndividualDataRepository;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=IndividualDataRepository::class)
+ * @ApiResource(
+ *      normalizationContext={"groups"={"write:data"}},
+ *      collectionOperations={"GET"},
+ *      itemOperations={
+ *          "GET" = {"security" = "is_granted('INDIVIDUAL_DATA_PATCH', object)"},
+ *          "PATCH",
+ *      }
+ * )
  */
 class IndividualData
 {
@@ -23,6 +34,7 @@ class IndividualData
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"write:data"})
      */
     private $data;
 

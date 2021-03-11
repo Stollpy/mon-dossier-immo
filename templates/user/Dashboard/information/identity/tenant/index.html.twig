@@ -8,20 +8,59 @@
 <div class="container-fluid">
     <div class="container">
         <div class="row">
-            <div class="col-6 rounded shadow-sm">
+            <div class="col-lg-6 rounded shadow-sm">
                 <div class="row">
                     <div class="col-12">
                         <h2>Formulaire d'identité</h2>
                     </div>
                     <div class="col-12 mb-3">
-                        {{ form_start(form) }}
-                        {{ form_widget(form) }}
-                        <input type="submit" class="btn btn-outline-primary mt-3" value="Modifier">
-                        {{ form_end(form) }}
+                    {{ form_start(form) }}
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                {{ form_label(form.firstname) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.firstname, { 'attr': { 'readonly': true } }) }}
+                                    <button class="btn btn-outline-primary edit-btn" type="button" data-input-id="firstname">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                {{ form_label(form.lastname) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.lastname, { 'attr': { 'readonly': true } }) }}
+                                    <button class="btn btn-outline-primary edit-btn" type="button" data-input-id="lastname">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                {{ form_label(form.birth_date) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.birth_date, { 'attr': { 'readonly': true } }) }}
+                                    <button class="btn btn-outline-primary edit-btn" type="button" data-input-id="birth_date">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                {{ form_label(form.tel) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.tel, { 'attr': { 'readonly': true } }) }}
+                                    <button class="btn btn-outline-primary edit-btn" type="button" data-input-id="tel">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {{ form_end(form) }}
                     </div>
                 </div>
             </div>
-            <div class="col-6 mr-2 rounded shadow-sm">
+            <div class="col-lg-6 mr-2 rounded shadow-sm">
                 <div class="row">
                     <div class="col-12">
                         <h2>Documents d'identité</h2>
@@ -150,6 +189,44 @@
 {% endblock %}
 {% block javascripts %}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+<script>
+window.onload = function () {
+    var btnAll = document.querySelectorAll('.edit-btn');
+    for(const btn of btnAll){
+        btn.addEventListener('click', function(event){
+            const dataId = this.getAttribute('data-input-id');
+            const input = document.getElementById('identity_' + dataId);
+            if(input.getAttribute('readonly')){
+                input.removeAttribute('readonly');
+            }else{
+                input.setAttribute('readonly', 'readonly');
+                const idReq = input.getAttribute('data-ind-id');
+                const value = input.getAttribute('value');
+                
+                fetch('/api/individual_datas/'+idReq, {
+                    method: 'PATCH', 
+                    body: JSON.stringify({
+                        data: value
+                    }),                    
+                })
+                .then(function(response){
+                    if(response.status !== 204 || response.status !== 200){
+                        console.log('Erreur status ' + response.status);
+                    }
+                    {# responce => responce.json() #}
+                    console.log(response);
+                })
+                .catch(function(error){
+                    console.log(error)
+                })
+            }
+
+        })
+    }
+}
+</script>
+
 <script>
     {# Canvas séléctionner #}
     var canvasIdentity = document.querySelector('#myChartIdentity');
@@ -184,8 +261,6 @@
         document.getElementById('colIdentity').innerHTML = finish; 
      }
 </script>
-
-
 <script>
 {# Scirpt domiciliation #}
 var canvasDomiciliation = document.querySelector('#myChartDomiciliation');
@@ -216,7 +291,6 @@ var canvasDomiciliation = document.querySelector('#myChartDomiciliation');
         document.getElementById('colDomiciliation').innerHTML = finish; 
     }
 </script>
-
 <script>
     var canvasIncome = document.querySelector('#myChartIncome');
     {# Calcul revenus #}

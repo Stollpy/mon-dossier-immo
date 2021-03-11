@@ -12,7 +12,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ApiResource(
  *      normalizationContext={"groups"={"read:ads"}},
  *      collectionOperations={"GET"},
- *      itemOperations={"GET"}
+ *      itemOperations={
+ *          "GET",
+ *          "DELETE" = {"security" = "is_granted('PICTURES_DELETE', object)"}
+ *      }
  * )
  */
 class AdsPictures
@@ -21,6 +24,7 @@ class AdsPictures
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"read:ads"})
      */
     private $id;
 

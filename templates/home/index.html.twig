@@ -6,13 +6,14 @@
     <div class="container-fluid">
         <div class="container">
             <div class="row">
-                <div class="col-12">
+                <div class="col-12 text-center">
                     <h1>Bienvenue sur la page d'acceuil</h1>
+                    <div class="spinner-grow mt-5" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
                 </div>
                 <div class="row" id="displayAds">
-                    <div class="spinner-grow text-primary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -57,11 +58,11 @@
                                     }
 
                                     document.querySelector('#carousel'+data['hydra:member'][i]['id']).innerHTML += '</div>\n'
-                                    +'<button class="carousel-control-prev bg-transparent" type="button", data-bs-target="#carousel'+ data['hydra:member'][i]['id'] +'" data-bs-slide="prev">\n'
+                                    +'<button class="carousel-control-prev bg-transparent" type="button" data-bs-target="#carousel'+ data['hydra:member'][i]['id'] +'" data-bs-slide="prev">\n'
                                     +'<span class=" bg-transparant border-none carousel-control-prev-icon" aria-hidden="true"></span>\n'
                                     +'<span class="visually-hidden">Previous</span>\n'
                                     +'</button>\n'
-                                    +'<button class="carousel-control-next bg-transparent" type="button", data-bs-target="#carousel'+ data['hydra:member'][i]['id'] +'" data-bs-slide="next">\n'
+                                    +'<button class="carousel-control-next bg-transparent" type="button" data-bs-target="#carousel'+ data['hydra:member'][i]['id'] +'" data-bs-slide="next">\n'
                                     +'<span class="bg-transparant border-none carousel-control-next-icon" aria-hidden="true"></span>\n'
                                     +'<span class="visually-hidden">Next</span>\n'
                                     +'</button>\n'
@@ -71,7 +72,7 @@
                                     +'<p class="card-text">Type d\'annonce : '+ data['hydra:member'][i]['adsCategory']['label'] +'</p>\n'
                                     +'<p class="card-text">Prix : '+ new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(data['hydra:member'][i]['price']) +'</p>\n'
                                     +'<p class="card-text">'+ data['hydra:member'][i]['content'].slice(0, 125) +' [...]</p>\n'
-                                    +'<a href="/annonces/'+ data['hydra:member'][i]['id'] +'" class="btn btn-outline-primary">Voir l\'annonce</a>\n'
+                                    +'<a href="/annonce/'+ data['hydra:member'][i]['id'] +'" class="btn btn-outline-primary">Voir l\'annonce</a>\n'
                                 +'</div>\n'
                             +'</div>\n'
                         +'</div>\n'
@@ -86,7 +87,10 @@
         }
     })
     .catch(function(error) {
-        console.log('Erreur de fetch :' + error);
+        document.querySelector('.spinner-grow').style.display = 'none';
+            affichage.innerHTML += '<div class="col-12 text-center mt-5">\n'
+                +'<h2>Une erreur c\'est produite😭 Veuillez réessayer.</h2>\n'
+            +'</div>\n'
     });
 </script>
 {% endblock %}

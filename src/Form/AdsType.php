@@ -26,6 +26,7 @@ class AdsType extends AbstractType
                 ],
             ])
             ->add('category', ChoiceType::class, [
+                'mapped' => false,
                 'label' => 'Type d\'annonce',
                 'choices' => [
                     'À louez' => 'rental',
@@ -53,6 +54,7 @@ class AdsType extends AbstractType
                 ],
             ])
             ->add('pictures', FileType::class, [
+                'mapped' => false,
                 'label' => 'Vos images',
                 'attr' => ['class' => 'form-control'],
                 'required' => false,
