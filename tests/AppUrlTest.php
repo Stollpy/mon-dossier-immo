@@ -14,7 +14,7 @@ class AppUrlTest extends WebTestCase{
 
         foreach($urls as $url){
             $client->request('GET', $url);
-            $this->assertTrue($client->getResponse()->isSuccessful());
+            $this->assertTrue($client->getResponse()->isSuccessful(), 'Route '.$url.' : OK');
         }
 
     }
