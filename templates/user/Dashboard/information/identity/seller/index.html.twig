@@ -1,7 +1,5 @@
 {% extends "user/Dashboard/information/base.html.twig"%}
-{% block stylesheets %}
-<style type="text/css" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css"></style>
-{% endblock %}
+
 {% block title %}Dashboard - Mon identité{% endblock %}
 
 {% block functionality %}
@@ -16,7 +14,6 @@
                     <div class="col-12 mb-3">
                         {{ form_start(form) }}
                         {{ form_widget(form) }}
-                        <input type="submit" class="btn btn-outline-primary mt-3" value="Modifier">
                         {{ form_end(form) }}
                     </div>
                 </div>
@@ -34,34 +31,11 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 mt-3">
-                <div class="row">
-                    <div class="col-12 shadow-sm">
-                        <table class="table">
-                                <thead>
-                                    <h4>Vos informations personelles</h4>
-                                </thead>
-                                 <hr class="dropdown-divider">
-                            <tbody>
-                                <tr>
-                                    {% for data in datas %}
-                                        <td>
-                                            {% if data.data is defined and data.data is not null %} 
-                                                Votre {{ data.profilModelData.label }}:  {{ data.data }}
-                                            {% else %}
-                                                Vous n'avez pas préciser votre {{ data.profilModelData.label }}
-                                            {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 {% block javascripts %}
+{{ parent() }}
+{{ encore_entry_script_tags('identity_form') }}
 {% endblock %}

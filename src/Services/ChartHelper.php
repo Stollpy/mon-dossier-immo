@@ -30,7 +30,7 @@ class ChartHelper {
      * @param Individual $individual
      * @param string $profile
      * @param array $options
-     * @return void
+     * @return $data
      */
     public function smallChartCalculated(Individual $individual, string $profile)
     {
@@ -58,7 +58,7 @@ class ChartHelper {
      * des revenus
      *
      * @param Individual $individual
-     * @return void
+     * @return $data
      */
     public function smallCharteIncome(Individual $individual)
     {

@@ -2,13 +2,25 @@
 
 namespace App\Entity;
 
-use App\Repository\IndividualDataCategoryRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use App\Repository\IndividualDataCategoryRepository;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ORM\Entity(repositoryClass=IndividualDataCategoryRepository::class)
+ * @ApiResource(
+ *      normalizationContext={"groups"={"read:dataCategory"}},
+ *      denormalizationContext={"groups"={"write:dataCategory"}},
+ *      itemOperations={
+ *          "GET"
+ *      }
+ * )
+ * @ApiFilter(SearchFilter::class, properties={"code": "exact"})
  */
 class IndividualDataCategory
 {
@@ -26,6 +38,7 @@ class IndividualDataCategory
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"read:data"})
      */
     private $code;
 

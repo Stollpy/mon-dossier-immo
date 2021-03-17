@@ -16,6 +16,13 @@ class FormHelper {
     private $user;
     private $dataRepository;
 
+    /**
+     * Constructor
+     *
+     * @param UserRepository $userRepository
+     * @param Security $security
+     * @param IndividualDataRepository $dataRepository
+     */
     public function __construct(UserRepository $userRepository, Security $security, IndividualDataRepository $dataRepository)
     {
         $this->security = $security;
@@ -24,6 +31,13 @@ class FormHelper {
         $this->dataRepository = $dataRepository;
     }
 
+    /**
+     * Retournes les données nécessaires 
+     * pour générer un formulaire 
+     *  
+     * @param array $models
+     * @return void
+     */
     public function dataForm($models)
     {
         $datas = [];
@@ -35,6 +49,13 @@ class FormHelper {
         return $datas;
     }
 
+    /**
+     * Traitement des données reçu pour
+     * construire le formulaire
+     *
+     * @param ProfilModelData $model
+     * @return array
+     */
     public function genericData(ProfilModelData $model)
     {
         $types = $this->typeIdentity();
@@ -56,6 +77,14 @@ class FormHelper {
         return $dataForm;
     }
 
+    /**
+     * Formate si besoins les données 
+     * à pré-remplire
+     *
+     * @param string $code
+     * @param string $data
+     * @return void
+     */
     public function dataFormats(string $code, string $data)
     {
         // Pour tel  06 à +33 ^^
@@ -68,6 +97,12 @@ class FormHelper {
         }
     }
 
+    /**
+     * Type de formulaire avec 
+     * namespace
+     *
+     * @return array
+     */
     public function typeIdentity()
     {
         $types = [

@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 class UploadFilesHelper{
 
     const UPLOAD_REFERENCE_PRIVATE = 'Private_Document';
-    const UPLOAD_REFERENCE_PUBLIC = '';
+    const UPLOAD_REFERENCE_PRIVATE_PUBLIC = '';
 
     private $slugger;
     private $manager;
@@ -48,7 +48,7 @@ class UploadFilesHelper{
      */
     public function uploadDocPublic(UploadedFile $file, Individual $individual, string $label, IndividualDataCategory $category)
     {
-        $fileName = $this->uploadDocGeneric($file, self::UPLOAD_REFERENCE_PUBLIC);
+        $fileName = $this->uploadDocGeneric($file, self::UPLOAD_REFERENCE_PRIVATE_PUBLIC);
 
         $document = new Document();
         $document->setData($fileName);
@@ -187,7 +187,7 @@ class UploadFilesHelper{
     public function uploadPicturesAdsPublic($files, Ads $ads)
     {
         foreach ($files as $file){
-            $fileName = $this->uploadDocGeneric($file, self::UPLOAD_REFERENCE_PUBLIC);
+            $fileName = $this->uploadDocGeneric($file, self::UPLOAD_REFERENCE_PRIVATE_PUBLIC);
 
             $adsPicture = new AdsPictures();
             $adsPicture->setData($fileName);

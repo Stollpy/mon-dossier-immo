@@ -126,7 +126,7 @@ class Document
 
     public function getFilePath(): string
     {
-    return UploadFilesHelper::UPLOAD_REFERENCE. '/' . $this->data;
+    return UploadFilesHelper::UPLOAD_REFERENCE_PRIVATE. '/' . $this->data;
     }
 
     public function getProfile(): ?Profiles

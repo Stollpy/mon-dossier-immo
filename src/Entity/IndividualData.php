@@ -3,20 +3,26 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\IndividualDataRepository;
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Repository\IndividualDataRepository;
 use Symfony\Component\Serializer\Annotation\Groups;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 
 /**
  * @ORM\Entity(repositoryClass=IndividualDataRepository::class)
  * @ApiResource(
- *      normalizationContext={"groups"={"write:data"}},
- *      collectionOperations={"GET"},
+ *      normalizationContext={"groups"={"read:data"}},
+ *      denormalizationContext={"groups"={"write:data"}},
+ *      collectionOperations={
+ *          "GET",
+ *      },
  *      itemOperations={
  *          "GET" = {"security" = "is_granted('INDIVIDUAL_DATA_PATCH', object)"},
- *          "PATCH",
+ *          "PATCH" = {"security" = "is_granted('INDIVIDUAL_DATA_PATCH', object)"},
  *      }
  * )
+ * @ApiFilter(SearchFilter::class, properties={"individual": "exact"})
  */
 class IndividualData
 {
@@ -29,6 +35,7 @@ class IndividualData
 
     /**
      * @ORM\ManyToOne(targetEntity=Individual::class, inversedBy="individualData")
+     * @Groups({"read:ads"})
      */
     private $individual;
 
@@ -40,6 +47,7 @@ class IndividualData
 
     /**
      * @ORM\ManyToOne(targetEntity=ProfilModelData::class, inversedBy="IndividualData")
+     * @Groups({"read:data"})
      */
     private $profilModelData;
 

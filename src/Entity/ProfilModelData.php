@@ -5,11 +5,20 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\IndividualDataCategory;
 use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ProfilModelDataRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=ProfilModelDataRepository::class)
+ * @ApiResource(
+ *      normalizationContext={"groups"={"read:model"}},
+ *      denormalizationContext={"groups"={"write:model"}},
+ *      itemOperations={
+ *          "GET"
+ *      }
+ * )
  */
 class ProfilModelData
 {
@@ -17,6 +26,7 @@ class ProfilModelData
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"read:model", "read:data"})
      */
     private $id;
 
@@ -43,6 +53,7 @@ class ProfilModelData
     /**
      * @ORM\ManyToOne(targetEntity=IndividualDataCategory::class, inversedBy="ProfilModelData")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"read:model", "read:data"})
      */
     private $individualDataCategory;
 

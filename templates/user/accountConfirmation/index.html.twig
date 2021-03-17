@@ -27,7 +27,7 @@
     </div>
 </div>
 {% endblock %}
-
 {% block javascripts %}
-    <script src="/assets/js/RedirectHome.js"></script>
+{{ parent() }}
+{{ encore_entry_script_tags('redirect_home') }}
 {% endblock %}

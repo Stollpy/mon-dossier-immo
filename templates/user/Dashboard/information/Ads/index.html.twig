@@ -1,8 +1,4 @@
 {% extends "user/Dashboard/information/base.html.twig" %}
-{% block stylesheets %}
-{{ parent() }}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.8.0/dropzone.min.css" integrity="sha512-jU/7UFiaW5UBGODEopEqnbIAHOI8fO6T99m7Tsmqs2gkdujByJfkCbbfPSN4Wlqlb9TGnsuC0YgUgWkRBK7B9A==" crossorigin="anonymous" />
-{% endblock %}
 {% block functionality %}
 <div class="container-fluid">
     <div class="container">
@@ -52,7 +48,7 @@
                                         <p class="card-text">Type d'annonce : {{ item.adsCategory.label }}</p>
                                         <p class="card-text">Prix : {{ item.price|number_format(2, '.', ' ') }} €</p>
                                         <p class="card-text">{{ item.content|slice(0, 125) }} [...]</p>
-                                        <a href="#" class="btn btn-outline-primary">Re éditer cette annonce</a>
+                                        <a href="{{ path('ads.edit', {'id' : item.id}) }}" class="btn btn-outline-primary">Re éditer cette annonce</a>
                                     </div>
                                 </div>
                             </div>
@@ -72,8 +68,4 @@
         </div>
     </div>
 </div>
-{% endblock %}
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.8.0/min/dropzone.min.js" integrity="sha512-OrzfT4DZdVn0D1+jawpCOnNLYTdv2KJKeuPgjSn5vjD2ew59jXgSDItHrC4WYLfqxxONojMKc9Rl6s12GZKkiw==" crossorigin="anonymous"></script>
 {% endblock %}

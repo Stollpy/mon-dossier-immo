@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Services\Voters;
+namespace App\Security\Voters;
 
 use App\Entity\IndividualData;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\VoterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
+class PatchIndividualData implements VoterInterface {
 
-class PatchIndividualData implements VoterInterface
-{
     public function vote(TokenInterface $token, $subject, array $attributes)
     {
         if(!$subject instanceof IndividualData){
@@ -21,7 +20,7 @@ class PatchIndividualData implements VoterInterface
         }
 
         $user = $token->getUser();
-        
+
         if(!$user instanceof UserInterface){
             return self::ACCESS_DENIED;
         }
@@ -33,3 +32,4 @@ class PatchIndividualData implements VoterInterface
         return self::ACCESS_GRANTED;
     }
 }
+
